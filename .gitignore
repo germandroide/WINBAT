@@ -1,0 +1,31 @@
+# PowerShell / Windows
+!*.ps1
+!global_config.ps1
+
+# Temporary Files
+*.tmp
+*.log
+*.bak
+*.swp
+*.swo
+
+# Disk Images & Virtual Hard Disks (Large files)
+*.vhdx
+*.vhd
+*.iso
+*.img
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# OS Generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+System Volume Information/
+
+# Project Specific
+WinBat_Base.vhdx
+WinBat_Child.vhdx
