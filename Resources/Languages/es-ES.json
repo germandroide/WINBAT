@@ -17,7 +17,20 @@
   "INSTALL_MAKE_BOOTABLE": "Haciendo el VHDX arrancable...",
   "INSTALL_CREATE_CHILD": "Creando VHDX Hijo (Child)...",
   "INSTALL_ADD_BOOT_ENTRY": "Añadiendo entrada de arranque...",
+  "INSTALL_INJECT_OPTIMIZER": "Inyectando optimizador de primer inicio...",
   "INSTALL_COMPLETE": "¡Instalación Completa! Reinicie su computadora para ver 'WinBat Console Mode'.",
   "ERR_DISM_FAIL": "Falló la operación DISM. Limpiando...",
-  "ERR_GENERIC": "Ocurrió un error: "
+  "ERR_GENERIC": "Ocurrió un error: ",
+  "OPT_STARTING": "Iniciando Optimización de WinBat...",
+  "OPT_RESTORE_POINT": "Creando Punto de Restauración del Sistema...",
+  "OPT_ISOLATING_DRIVES": "Aislando discos del Host...",
+  "OPT_HIDING_DRIVE": "  -> Ocultando Unidad {0}:",
+  "OPT_SERVICES": "Optimizando Servicios de Windows...",
+  "OPT_POWER": "Aplicando Plan de Energía de Máximo Rendimiento...",
+  "OPT_DEFENDER": "Configurando Exclusiones de Windows Defender...",
+  "OPT_DEBLOAT": "Eliminando Bloatware...",
+  "OPT_SHELL_USER": "Creando usuario AdminRescue...",
+  "OPT_SHELL_CHANGE": "Configurando Shell Personalizado (Modo Consola)...",
+  "OPT_COMPLETE": "¡Optimización Completa!",
+  "OPT_RESTARTING": "Reiniciando el sistema en 5 segundos..."
 }

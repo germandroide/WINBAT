@@ -89,18 +89,30 @@ try {
     # ==========================================
     # 4. Create Exclusion List (WimScript.ini)
     # ==========================================
-    $WimScriptContent = @"
-[ExclusionList]
-\System Volume Information
-\`$Recycle.Bin
-\pagefile.sys
-\swapfile.sys
-\hiberfil.sys
-\Windows\SoftwareDistribution
-\WinBat
-\WinBat_Base.vhdx
-\WinBat_Child.vhdx
-"@
+
+    # Dynamically calculate path relative to drive root for exclusion
+    $InstallDrive = (Split-Path $InstallPath -Qualifier)
+    $SystemDrive = (Get-Item env:SystemDrive).Value
+
+    $ExcludedPaths = @(
+        "\System Volume Information",
+        "\`$Recycle.Bin",
+        "\pagefile.sys",
+        "\swapfile.sys",
+        "\hiberfil.sys",
+        "\Windows\SoftwareDistribution"
+    )
+
+    # If installing on the same drive as System (Host), exclude the install folder
+    if ($InstallDrive -eq $SystemDrive) {
+        $RelativeInstallPath = (Split-Path $InstallPath -NoQualifier)
+        if (-not $RelativeInstallPath.StartsWith("\")) { $RelativeInstallPath = "\$RelativeInstallPath" }
+        $ExcludedPaths += $RelativeInstallPath
+    }
+
+    # Construct Exclusion List String
+    $WimScriptContent = "[ExclusionList]`r`n" + ($ExcludedPaths -join "`r`n")
+
     $WimScriptPath = Join-Path -Path $InstallPath -ChildPath "WimScript.ini"
     Set-Content -Path $WimScriptPath -Value $WimScriptContent
 
@@ -160,6 +172,41 @@ try {
 
     # Create Setup Flag
     New-Item -Path (Join-Path $TargetDriveLetter "WinBat_Setup_Pending.flag") -ItemType File -Force | Out-Null
+
+    # ==========================================
+    # 7b. Inject Optimizer Script & RunOnce
+    # ==========================================
+    Write-Host (Get-Tr "INSTALL_INJECT_OPTIMIZER")
+
+    # Create Directory in VHDX
+    $VHDXOptDir = Join-Path $TargetDriveLetter "WinBat\Optimizer"
+    New-Item -Path $VHDXOptDir -ItemType Directory -Force | Out-Null
+
+    # Copy Optimizer Scripts & Config
+    # We need global_config.ps1 and Optimizer/WinBat_FirstBoot.ps1 AND language resources
+    $SourceOpt = Join-Path $ScriptPath "..\Optimizer\WinBat_FirstBoot.ps1"
+    $SourceConfig = Join-Path $ScriptPath "..\global_config.ps1"
+    $SourceResources = Join-Path $ScriptPath "..\Resources"
+
+    Copy-Item -Path $SourceOpt -Destination $VHDXOptDir -Force
+    Copy-Item -Path $SourceConfig -Destination (Join-Path $TargetDriveLetter "WinBat\global_config.ps1") -Force
+    Copy-Item -Path $SourceResources -Destination (Join-Path $TargetDriveLetter "WinBat\Resources") -Recurse -Force
+
+    # Inject RunOnce via Registry
+    # Mount Guest SYSTEM Hive
+    $GuestSystemHive = Join-Path $TargetDriveLetter "Windows\System32\config\SYSTEM"
+    $GuestSoftwareHive = Join-Path $TargetDriveLetter "Windows\System32\config\SOFTWARE"
+
+    # We use reg.exe to load hive
+    reg load HKLM\WB_GUEST_SOFT "$GuestSoftwareHive"
+
+    # Add RunOnce Key
+    # Command: PowerShell.exe -ExecutionPolicy Bypass -File "C:\WinBat\Optimizer\WinBat_FirstBoot.ps1"
+    $RunCmd = "PowerShell.exe -ExecutionPolicy Bypass -File `"C:\WinBat\Optimizer\WinBat_FirstBoot.ps1`""
+    reg add "HKLM\WB_GUEST_SOFT\Microsoft\Windows\CurrentVersion\RunOnce" /v "WinBatOptimizer" /t REG_SZ /d $RunCmd /f
+
+    # Unload Hive
+    reg unload HKLM\WB_GUEST_SOFT
 
     # ==========================================
     # 8. Finalize Base & Create Child

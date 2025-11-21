@@ -17,7 +17,20 @@
   "INSTALL_MAKE_BOOTABLE": "Making VHDX bootable...",
   "INSTALL_CREATE_CHILD": "Creating Child VHDX...",
   "INSTALL_ADD_BOOT_ENTRY": "Adding boot entry...",
+  "INSTALL_INJECT_OPTIMIZER": "Injecting FirstBoot optimizer...",
   "INSTALL_COMPLETE": "Installation Complete! Restart your computer to see 'WinBat Console Mode'.",
   "ERR_DISM_FAIL": "DISM operation failed. Cleaning up...",
-  "ERR_GENERIC": "An error occurred: "
+  "ERR_GENERIC": "An error occurred: ",
+  "OPT_STARTING": "Starting WinBat Optimization...",
+  "OPT_RESTORE_POINT": "Creating System Restore Point...",
+  "OPT_ISOLATING_DRIVES": "Isolating Host drives...",
+  "OPT_HIDING_DRIVE": "  -> Hiding Drive {0}:",
+  "OPT_SERVICES": "Optimizing Windows Services...",
+  "OPT_POWER": "Applying Ultimate Performance Power Plan...",
+  "OPT_DEFENDER": "Configuring Windows Defender Exclusions...",
+  "OPT_DEBLOAT": "Removing Bloatware...",
+  "OPT_SHELL_USER": "Creating AdminRescue user...",
+  "OPT_SHELL_CHANGE": "Setting Custom Shell (Console Mode)...",
+  "OPT_COMPLETE": "Optimization Complete!",
+  "OPT_RESTARTING": "Restarting system in 5 seconds..."
 }
