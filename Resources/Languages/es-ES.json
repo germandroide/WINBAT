@@ -1,0 +1,6 @@
+{
+  "SETUP_WELCOME": "Bienvenido a WinBat Suite",
+  "SETUP_DISK_WARN": "Advertencia: Esto modificará tus particiones",
+  "BTN_NEXT": "Siguiente",
+  "ERROR_NO_SPACE": "No hay suficiente espacio en disco"
+}
