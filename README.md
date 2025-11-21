@@ -20,17 +20,18 @@ El núcleo de WinBat se basa en la capacidad nativa de Windows para arrancar des
 
 Esta arquitectura permite la **Reversibilidad Instantánea**: Si el sistema "Windows-G" se corrompe o degrada, basta con borrar el archivo `WinBat_Child.vhdx` para resetear la consola a su estado de fábrica en menos de 1 segundo.
 
-### Estrategia de Disco y Particiones
+### Instalación no destructiva en carpeta + Gestor de Montaje Dinámico
 
-El instalador automatizado gestiona el almacenamiento de la siguiente manera:
-1.  Reduce la partición principal (C:) del Host de forma segura.
-2.  Crea una partición física dedicada llamada `GAMES_DATA`.
-3.  Aloja los archivos VHDX dentro de `GAMES_DATA`.
+A diferencia de otros sistemas duales, WinBat utiliza una estrategia **File-Based** (basada en archivos) para evitar riesgos en tus datos:
+
+1.  **Sin Reparticionado:** No modificamos la estructura física de tu disco duro. No se reduce C: ni se crean particiones nuevas.
+2.  **Instalación Flexible:** El sistema (los archivos VHDX) puede residir en cualquier carpeta elegida por el usuario (ej: `C:\WinBat`, o en un SSD externo).
+3.  **Aislamiento por Software:** Aunque los archivos están en tu disco, Windows-G arranca sin montar las particiones del Host, garantizando privacidad.
 
 ### Filosofía de Aislamiento "WinUAE/Amiga"
 
 *   **Aislamiento de Datos:** Cuando `Windows-G` arranca, el disco del sistema Host se marca como **Offline**. El entorno de juegos no tiene acceso a tus documentos, claves o datos personales del Host por defecto.
-*   **Storage Manager:** Usamos un gestor de almacenamiento integrado (compatible con interfaces como RetroBat) que permite montar carpetas específicas, ISOs o unidades USB bajo demanda, protegido por mecanismos de seguridad (MFA/PIN).
+*   **Storage Manager:** Usamos un gestor de almacenamiento integrado (compatible con interfaces como RetroBat) que permite "montar" carpetas específicas, ISOs o unidades USB del Host bajo demanda, protegido por mecanismos de seguridad (MFA/PIN).
 
 ## Optimización y Rendimiento (Windows-G)
 
@@ -54,7 +55,7 @@ El entorno Guest está diseñado bajo un manifiesto estricto para minimizar late
 
 **LEER ATENTAMENTE ANTES DE USAR:**
 
-Este software realiza operaciones avanzadas de particionado de disco y modificación de registros del sistema. Aunque se han tomado medidas para garantizar la seguridad y estabilidad:
+Este software realiza operaciones avanzadas de arranque nativo (Native Boot) y modificación de registros del sistema. Aunque se han tomado medidas para garantizar la seguridad y estabilidad:
 
 1.  **WinBat Suite se proporciona "tal cual", sin garantía de ningún tipo.**
 2.  El uso de estos scripts es bajo su propia responsabilidad.

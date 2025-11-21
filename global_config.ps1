@@ -7,14 +7,12 @@
 #>
 
 # ==========================================
-# 1. Partition & Disk Configuration
+# 1. Installation Path & Disk Configuration
 # ==========================================
-# The label for the dedicated partition where VHDX files will reside
-$Global:WB_PartitionLabel       = "GAMES_DATA"
-# Preferred drive letter for the GAMES_DATA partition (if available)
-$Global:WB_PartitionDriveLetter = "G"
-# Default reserved size for the partition/VHDX (in GB)
-$Global:WB_ReservedSizeGB       = 100
+# Base path where VHDX files will be created (User selectable)
+$Global:WB_InstallPath          = "C:\WinBat"
+# Maximum dynamic size for the VHDX (in GB)
+$Global:WB_VHDMaxSizeGB         = 100
 
 # ==========================================
 # 2. VHDX Configuration

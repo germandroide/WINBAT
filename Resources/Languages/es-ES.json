@@ -1,6 +1,7 @@
 {
   "SETUP_WELCOME": "Bienvenido a WinBat Suite",
-  "SETUP_DISK_WARN": "Advertencia: Esto modificará tus particiones",
+  "SETUP_PATH_SELECT": "Selecciona la carpeta de instalación",
+  "SETUP_NO_PARTITION": "No se requiere particionado. Instalación segura.",
   "BTN_NEXT": "Siguiente",
   "ERROR_NO_SPACE": "No hay suficiente espacio en disco"
 }

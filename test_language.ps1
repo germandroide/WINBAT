@@ -23,7 +23,7 @@ Write-Host "Loaded Language: $Global:WB_CurrentLanguage"
 Write-Host "--------------------------------------------------"
 
 # Test Translation Keys
-$KeysToTest = @("SETUP_WELCOME", "SETUP_DISK_WARN", "BTN_NEXT", "NON_EXISTENT_KEY")
+$KeysToTest = @("SETUP_WELCOME", "SETUP_NO_PARTITION", "BTN_NEXT", "NON_EXISTENT_KEY")
 
 foreach ($Key in $KeysToTest) {
     $TranslatedValue = Get-Tr -Key $Key
