@@ -197,6 +197,30 @@ try {
     $DestStorage = Join-Path $TargetDriveLetter "WinBat\StorageManager"
     Copy-Item -Path $SourceStorage -Destination $DestStorage -Recurse -Force
 
+    # Copy OOBE (Wizard)
+    $SourceOOBE = Join-Path $ScriptPath "..\OOBE"
+    $DestOOBE = Join-Path $TargetDriveLetter "WinBat\OOBE"
+    Copy-Item -Path $SourceOOBE -Destination $DestOOBE -Recurse -Force
+
+    # Setup RetroBat (Mock/Download)
+    Write-Host "Setting up RetroBat..."
+    $RetroBatDir = Join-Path $TargetDriveLetter "RetroBat"
+    if (-not (Test-Path $RetroBatDir)) { New-Item -Path $RetroBatDir -ItemType Directory -Force | Out-Null }
+
+    # Create ROM folders structure based on templates
+    $RomsDir = Join-Path $RetroBatDir "roms"
+    $Folders = @("vod", "cloud", "multimedia", "windows", "apps")
+    foreach ($F in $Folders) {
+        $P = Join-Path $RomsDir $F
+        if (-not (Test-Path $P)) { New-Item -Path $P -ItemType Directory -Force | Out-Null }
+    }
+
+    # Copy System Template if exists
+    $SysTemplate = Join-Path $ScriptPath "..\Resources\es_systems_template.xml"
+    # In a real scenario, this would be merged into es_systems.cfg inside .emulationstation
+    # For now, we place it there for manual reference or future automation
+    Copy-Item -Path $SysTemplate -Destination (Join-Path $RetroBatDir "es_systems_winbat.xml") -Force
+
     # Inject RunOnce via Registry
     # Mount Guest SYSTEM Hive
     $GuestSystemHive = Join-Path $TargetDriveLetter "Windows\System32\config\SYSTEM"

@@ -1,0 +1,37 @@
+<!-- es_systems_template.xml -->
+<!-- Add these sections to your es_systems.cfg in C:\RetroBat\emulationstation\.emulationstation\es_systems.cfg -->
+
+<systemList>
+    <!-- WinBat Custom Systems -->
+
+    <system>
+        <name>vod</name>
+        <fullname>Video On Demand</fullname>
+        <path>C:\RetroBat\roms\vod</path>
+        <extension>.bat .lnk</extension>
+        <command>"%ROM%"</command>
+        <platform>windows</platform>
+        <theme>vod</theme>
+    </system>
+
+    <system>
+        <name>cloudgaming</name>
+        <fullname>Cloud Gaming</fullname>
+        <path>C:\RetroBat\roms\cloudgaming</path>
+        <extension>.bat .lnk</extension>
+        <command>"%ROM%"</command>
+        <platform>windows</platform>
+        <theme>cloud</theme>
+    </system>
+
+    <system>
+        <name>multimedia</name>
+        <fullname>Multimedia Apps</fullname>
+        <path>C:\RetroBat\roms\multimedia</path>
+        <extension>.bat .lnk .exe</extension>
+        <command>"%ROM%"</command>
+        <platform>windows</platform>
+        <theme>apps</theme>
+    </system>
+
+</systemList>

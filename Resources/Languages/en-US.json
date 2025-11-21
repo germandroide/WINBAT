@@ -46,5 +46,18 @@
   "SM_MOUNT_FAIL": "Failed to mount resource.",
   "SM_UNMOUNT_SUCCESS": "Successfully unmounted {0}:",
   "SM_UNMOUNT_FAIL": "Failed to unmount resource.",
-  "SM_ERR_ADMIN": "This tool requires Administrator privileges."
+  "SM_ERR_ADMIN": "This tool requires Administrator privileges.",
+  "WIZ_TITLE": "WinBat Welcome Wizard",
+  "WIZ_WELCOME": "Welcome to WinBat!",
+  "WIZ_SUBTITLE": "Let's set up your gaming experience.",
+  "WIZ_CAT_GAMING": "Gaming Platforms",
+  "WIZ_CAT_CLOUD": "Cloud Gaming",
+  "WIZ_CAT_MEDIA": "Multimedia",
+  "WIZ_CAT_VOD": "Video On Demand (Web)",
+  "WIZ_BTN_INSTALL": "Install Selected",
+  "WIZ_INSTALLING": "Installing {0}...",
+  "WIZ_DONE": "Setup Complete! Enjoy WinBat.",
+  "WIZ_MFA_TITLE": "Security Setup",
+  "WIZ_MFA_DESC": "Configure Microsoft Authenticator or USB Key for Admin access.",
+  "WIZ_MFA_BTN": "Configure MFA"
 }

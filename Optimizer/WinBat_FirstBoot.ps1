@@ -178,11 +178,37 @@ try {
     if (-not (Test-Path $RetroBatExe)) {
         New-Item -Path $RetroBatPath -ItemType Directory -Force | Out-Null
         # Create a dummy exe for testing if real one is missing
-        # In production, this might download/install RetroBat
         Set-Content -Path $RetroBatExe -Value "Placeholder"
     }
 
-    # 7c. Change Shell (Registry)
+    # 7c. Create Shell Launcher Wrapper
+    # Standard Run/RunOnce keys don't fire if Explorer isn't the shell.
+    # We create a wrapper to launch services and OOBE before RetroBat.
+    $LauncherPath = "C:\WinBat\ShellLauncher.ps1"
+    $LauncherContent = @"
+# WinBat Shell Launcher
+# Handles startup services and OOBE before launching RetroBat
+
+# 1. Start Mount Service
+Start-Process PowerShell.exe -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File C:\WinBat\StorageManager\WinBat_MountService.ps1" -WindowStyle Hidden
+
+# 2. Check for OOBE
+`$OobeFlag = "C:\WinBat\Config\OOBE_Done.flag"
+if (-not (Test-Path `$OobeFlag)) {
+    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\OOBE\WinBat_Welcome.ps1" -Wait
+    New-Item -Path `$OobeFlag -ItemType File -Force | Out-Null
+}
+
+# 3. Launch RetroBat (The actual shell)
+# Loop to ensure it restarts if closed (Kiosk behavior)
+while (`$true) {
+    Start-Process "$RetroBatExe" -Wait
+    Start-Sleep -Seconds 2
+}
+"@
+    Set-Content -Path $LauncherPath -Value $LauncherContent
+
+    # 7d. Change Shell (Registry) to Wrapper
     Write-Host (Get-Tr "OPT_SHELL_CHANGE")
 
     $ShellKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -194,15 +220,10 @@ try {
         New-Item -Path $ShellKey -Force | Out-Null
     }
 
-    Set-ItemProperty -Path $ShellKey -Name "Shell" -Value $RetroBatExe -Type String
-
-    # 7d. Persistence for Mount Service
-    # Add WinBat_MountService.ps1 to User Run key so it runs when shell starts
-    $MountServicePath = "C:\WinBat\StorageManager\WinBat_MountService.ps1"
-    $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    if (Test-Path $MountServicePath) {
-        Set-ItemProperty -Path $RunKey -Name "WinBatMounts" -Value "PowerShell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$MountServicePath`""
-    }
+    # Set Shell to PowerShell Launcher
+    # -WindowStyle Hidden avoids a flash, but for a Shell it might just show black until UI loads.
+    $ShellCmd = "PowerShell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File $LauncherPath"
+    Set-ItemProperty -Path $ShellKey -Name "Shell" -Value $ShellCmd -Type String
 
     # ==========================================
     # 8. Finalize

@@ -46,5 +46,18 @@
   "SM_MOUNT_FAIL": "Error al montar recurso.",
   "SM_UNMOUNT_SUCCESS": "Se desmontó correctamente {0}:",
   "SM_UNMOUNT_FAIL": "Error al desmontar recurso.",
-  "SM_ERR_ADMIN": "Esta herramienta requiere privilegios de Administrador."
+  "SM_ERR_ADMIN": "Esta herramienta requiere privilegios de Administrador.",
+  "WIZ_TITLE": "Asistente de Bienvenida WinBat",
+  "WIZ_WELCOME": "¡Bienvenido a WinBat!",
+  "WIZ_SUBTITLE": "Configuremos tu experiencia de juego.",
+  "WIZ_CAT_GAMING": "Plataformas de Juego",
+  "WIZ_CAT_CLOUD": "Juego en la Nube",
+  "WIZ_CAT_MEDIA": "Multimedia",
+  "WIZ_CAT_VOD": "Video Bajo Demanda (Web)",
+  "WIZ_BTN_INSTALL": "Instalar Seleccionados",
+  "WIZ_INSTALLING": "Instalando {0}...",
+  "WIZ_DONE": "¡Configuración Completa! Disfruta WinBat.",
+  "WIZ_MFA_TITLE": "Configuración de Seguridad",
+  "WIZ_MFA_DESC": "Configura Microsoft Authenticator o Llave USB para acceso Admin.",
+  "WIZ_MFA_BTN": "Configurar MFA"
 }
