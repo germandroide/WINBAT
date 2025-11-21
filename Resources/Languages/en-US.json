@@ -32,5 +32,19 @@
   "OPT_SHELL_USER": "Creating AdminRescue user...",
   "OPT_SHELL_CHANGE": "Setting Custom Shell (Console Mode)...",
   "OPT_COMPLETE": "Optimization Complete!",
-  "OPT_RESTARTING": "Restarting system in 5 seconds..."
+  "OPT_RESTARTING": "Restarting system in 5 seconds...",
+  "SM_TITLE": "WinBat Storage Manager",
+  "SM_PIN_REQ": "Authentication Required",
+  "SM_PIN_PROMPT": "Enter Security PIN:",
+  "SM_PIN_INVALID": "Invalid PIN.",
+  "SM_BTN_MOUNT": "Mount New Resource",
+  "SM_BTN_UNMOUNT": "Unmount Selected",
+  "SM_LBL_MOUNTS": "Active Mounts:",
+  "SM_SELECT_FOLDER": "Select Folder to Mount",
+  "SM_SELECT_DRIVE": "Select Virtual Drive Letter:",
+  "SM_MOUNT_SUCCESS": "Successfully mounted {0} to {1}:",
+  "SM_MOUNT_FAIL": "Failed to mount resource.",
+  "SM_UNMOUNT_SUCCESS": "Successfully unmounted {0}:",
+  "SM_UNMOUNT_FAIL": "Failed to unmount resource.",
+  "SM_ERR_ADMIN": "This tool requires Administrator privileges."
 }

@@ -32,5 +32,19 @@
   "OPT_SHELL_USER": "Creando usuario AdminRescue...",
   "OPT_SHELL_CHANGE": "Configurando Shell Personalizado (Modo Consola)...",
   "OPT_COMPLETE": "¡Optimización Completa!",
-  "OPT_RESTARTING": "Reiniciando el sistema en 5 segundos..."
+  "OPT_RESTARTING": "Reiniciando el sistema en 5 segundos...",
+  "SM_TITLE": "Gestor de Almacenamiento WinBat",
+  "SM_PIN_REQ": "Autenticación Requerida",
+  "SM_PIN_PROMPT": "Ingrese PIN de Seguridad:",
+  "SM_PIN_INVALID": "PIN Inválido.",
+  "SM_BTN_MOUNT": "Montar Nuevo Recurso",
+  "SM_BTN_UNMOUNT": "Desmontar Seleccionado",
+  "SM_LBL_MOUNTS": "Montajes Activos:",
+  "SM_SELECT_FOLDER": "Seleccione Carpeta a Montar",
+  "SM_SELECT_DRIVE": "Seleccione Letra de Unidad:",
+  "SM_MOUNT_SUCCESS": "Se montó correctamente {0} en {1}:",
+  "SM_MOUNT_FAIL": "Error al montar recurso.",
+  "SM_UNMOUNT_SUCCESS": "Se desmontó correctamente {0}:",
+  "SM_UNMOUNT_FAIL": "Error al desmontar recurso.",
+  "SM_ERR_ADMIN": "Esta herramienta requiere privilegios de Administrador."
 }

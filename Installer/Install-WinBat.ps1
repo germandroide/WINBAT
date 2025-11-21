@@ -192,6 +192,11 @@ try {
     Copy-Item -Path $SourceConfig -Destination (Join-Path $TargetDriveLetter "WinBat\global_config.ps1") -Force
     Copy-Item -Path $SourceResources -Destination (Join-Path $TargetDriveLetter "WinBat\Resources") -Recurse -Force
 
+    # Copy Storage Manager
+    $SourceStorage = Join-Path $ScriptPath "..\StorageManager"
+    $DestStorage = Join-Path $TargetDriveLetter "WinBat\StorageManager"
+    Copy-Item -Path $SourceStorage -Destination $DestStorage -Recurse -Force
+
     # Inject RunOnce via Registry
     # Mount Guest SYSTEM Hive
     $GuestSystemHive = Join-Path $TargetDriveLetter "Windows\System32\config\SYSTEM"

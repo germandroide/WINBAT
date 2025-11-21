@@ -196,6 +196,14 @@ try {
 
     Set-ItemProperty -Path $ShellKey -Name "Shell" -Value $RetroBatExe -Type String
 
+    # 7d. Persistence for Mount Service
+    # Add WinBat_MountService.ps1 to User Run key so it runs when shell starts
+    $MountServicePath = "C:\WinBat\StorageManager\WinBat_MountService.ps1"
+    $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    if (Test-Path $MountServicePath) {
+        Set-ItemProperty -Path $RunKey -Name "WinBatMounts" -Value "PowerShell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$MountServicePath`""
+    }
+
     # ==========================================
     # 8. Finalize
     # ==========================================

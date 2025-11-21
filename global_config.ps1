@@ -49,6 +49,7 @@ $Global:WB_RegPath_Defender     = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Def
 # ==========================================
 # Security settings for mounting sensitive host drives
 $Global:WB_MFA_Enabled          = $true
+$Global:WB_SecurityPIN          = "0000" # User configurable PIN
 $Global:WB_SecureMount_PinLen   = 6
 
 # ==========================================
