@@ -192,10 +192,18 @@ try {
 # 1. Start Mount Service
 Start-Process PowerShell.exe -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File C:\WinBat\StorageManager\WinBat_MountService.ps1" -WindowStyle Hidden
 
-# 2. Check for OOBE
+# 2. Check for OOBE / Dependencies
 `$OobeFlag = "C:\WinBat\Config\OOBE_Done.flag"
 if (-not (Test-Path `$OobeFlag)) {
-    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\OOBE\WinBat_Welcome.ps1" -Wait
+    # First Run Dependencies
+    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Optimizer\WinBat_Dependencies.ps1" -Wait
+
+    # Run OOBE App Manager (Welcome Mode is just the App Manager opened first time)
+    # We can just open the App Manager. The OOBE folder/script might be redundant if we unify,
+    # but the prompt asked for App Manager to have OOBE mode.
+    # For now, we launch App Manager.
+    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Apps\WinBat_AppManager.ps1" -Wait
+
     New-Item -Path `$OobeFlag -ItemType File -Force | Out-Null
 }
 

@@ -59,5 +59,17 @@
   "WIZ_DONE": "Setup Complete! Enjoy WinBat.",
   "WIZ_MFA_TITLE": "Security Setup",
   "WIZ_MFA_DESC": "Configure Microsoft Authenticator or USB Key for Admin access.",
-  "WIZ_MFA_BTN": "Configure MFA"
+  "WIZ_MFA_BTN": "Configure MFA",
+  "AM_TITLE": "WinBat App Manager",
+  "AM_BTN_INSTALL": "Install",
+  "AM_BTN_UNINSTALL": "Uninstall",
+  "AM_STATUS_INSTALLED": "Installed",
+  "AM_STATUS_NOT_INSTALLED": "Not Installed",
+  "AM_TAB_GAMING": "Game Stores",
+  "AM_TAB_VOD": "Streaming & VOD",
+  "AM_TAB_TOOLS": "Utilities",
+  "AM_TAB_SYSTEM": "System",
+  "DEP_INSTALLING": "Installing Dependencies (DirectX, VC++, .NET)... This may take time.",
+  "DEP_SUCCESS": "Dependencies installed successfully.",
+  "DEP_FAIL": "Failed to install some dependencies."
 }

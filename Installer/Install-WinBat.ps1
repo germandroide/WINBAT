@@ -202,6 +202,11 @@ try {
     $DestOOBE = Join-Path $TargetDriveLetter "WinBat\OOBE"
     Copy-Item -Path $SourceOOBE -Destination $DestOOBE -Recurse -Force
 
+    # Copy Apps Manager
+    $SourceApps = Join-Path $ScriptPath "..\Apps"
+    $DestApps = Join-Path $TargetDriveLetter "WinBat\Apps"
+    Copy-Item -Path $SourceApps -Destination $DestApps -Recurse -Force
+
     # Setup RetroBat (Mock/Download)
     Write-Host "Setting up RetroBat..."
     $RetroBatDir = Join-Path $TargetDriveLetter "RetroBat"
