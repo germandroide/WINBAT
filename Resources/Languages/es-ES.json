@@ -3,5 +3,21 @@
   "SETUP_PATH_SELECT": "Selecciona la carpeta de instalación",
   "SETUP_NO_PARTITION": "No se requiere particionado. Instalación segura.",
   "BTN_NEXT": "Siguiente",
-  "ERROR_NO_SPACE": "No hay suficiente espacio en disco"
+  "ERROR_NO_SPACE": "No hay suficiente espacio en disco",
+  "INSTALL_STARTING": "Iniciando instalación de WinBat...",
+  "INSTALL_ADMIN_REQ": "Se requieren privilegios de Administrador. Ejecute como Administrador.",
+  "INSTALL_SELECT_PATH": "Por favor ingrese la ruta de instalación (ej: C:\\WinBat):",
+  "INSTALL_SPACE_CHECK": "Verificando espacio libre...",
+  "INSTALL_SPACE_OK": "Espacio en disco suficiente.",
+  "INSTALL_SPACE_FAIL": "Espacio insuficiente. Se requieren mínimo 60GB.",
+  "INSTALL_CREATE_BASE": "Creando VHDX Base...",
+  "INSTALL_CLONE_START": "Iniciando captura y clonación del sistema. Esto puede tardar un rato...",
+  "INSTALL_CLONE_PROGRESS": "Clonación en progreso...",
+  "INSTALL_CLONE_DONE": "Clonación completada exitosamente.",
+  "INSTALL_MAKE_BOOTABLE": "Haciendo el VHDX arrancable...",
+  "INSTALL_CREATE_CHILD": "Creando VHDX Hijo (Child)...",
+  "INSTALL_ADD_BOOT_ENTRY": "Añadiendo entrada de arranque...",
+  "INSTALL_COMPLETE": "¡Instalación Completa! Reinicie su computadora para ver 'WinBat Console Mode'.",
+  "ERR_DISM_FAIL": "Falló la operación DISM. Limpiando...",
+  "ERR_GENERIC": "Ocurrió un error: "
 }
