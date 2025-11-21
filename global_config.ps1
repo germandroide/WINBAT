@@ -79,7 +79,41 @@ function Load-WinBatLanguage {
 
     $LangFile = Join-Path -Path $Global:WB_ResourcePath -ChildPath "Languages\$LangCode.json"
 
-    # Fallback to en-US if file doesn't exist
+    # Check for exact match, if not, check for parent culture (e.g. es-MX -> es-ES)
+    if (-not (Test-Path -Path $LangFile)) {
+        # Try parent culture (e.g. 'es' from 'es-MX')
+        $ParentCode = $SystemCulture.Parent.Name
+        $ParentFile = Join-Path -Path $Global:WB_ResourcePath -ChildPath "Languages\$ParentCode.json"
+
+        # Special case mappings if simple parent doesn't work or specific mapping desired
+        # For WinBat we have specific files like es-ES, pt-PT, pt-BR.
+        # If user is pt-AO (Angola), Parent is pt. We might want to map pt -> pt-PT or pt-BR?
+        # For simplicity, let's try to find ANY file starting with the parent code if specific parent doesn't exist.
+
+        # Logic:
+        # 1. Exact Match (handled above)
+        # 2. Fallback to standard regional variants if available (e.g. fr-CA -> fr-FR)
+
+        $FallbackMap = @{
+            "fr" = "fr-FR"
+            "de" = "de-DE"
+            "it" = "it-IT"
+            "es" = "es-ES"
+            "pt" = "pt-PT" # Default to PT-PT, unless pt-BR is specific
+            "ru" = "ru-RU"
+            "zh" = "zh-CN"
+            "ja" = "ja-JP"
+            "hi" = "hi-IN"
+            "ko" = "ko-KR"
+        }
+
+        if ($FallbackMap.ContainsKey($ParentCode)) {
+            $MappedCode = $FallbackMap[$ParentCode]
+            $LangFile = Join-Path -Path $Global:WB_ResourcePath -ChildPath "Languages\$MappedCode.json"
+        }
+    }
+
+    # Fallback to en-US if still not found
     if (-not (Test-Path -Path $LangFile)) {
         Write-Warning "Language '$LangCode' not supported. Falling back to 'en-US'."
         $LangCode = "en-US"
