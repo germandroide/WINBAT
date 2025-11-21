@@ -28,7 +28,7 @@ $Global:WB_VHDXName_Child       = "WinBat_Child.vhdx"
 # ==========================================
 # 3. Boot Configuration
 # ==========================================
-$Global:WB_BootEntryName        = "Windows-G"
+$Global:WB_BootEntryName        = "WinBat Console Mode"
 $Global:WB_HostBootEntryName    = "Windows Host"
 
 # ==========================================

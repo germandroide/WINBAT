@@ -2,7 +2,7 @@
     WinBat Suite - Optimizer Script
     WinBat_FirstBoot.ps1
 
-    This script runs ONCE inside the Guest environment (Windows-G).
+    This script runs ONCE inside the WinBat Console Mode environment.
     It transforms the standard Windows installation into a Gaming Console OS.
 
     Triggers:

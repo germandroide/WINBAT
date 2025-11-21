@@ -1,64 +1,91 @@
 # WinBat Suite (Universal Edition)
 
-## Visión General
+## ¿Qué es WinBat?
 
-**WinBat Suite** es una colección de scripts en PowerShell de código abierto diseñada para transformar cualquier PC con Windows 10 u 11 en un sistema híbrido de doble propósito.
+**WinBat Suite** es una solución de código abierto que transforma tu PC con Windows 10 u 11 en un sistema híbrido de doble propósito, sin perder tu configuración actual.
 
 1.  **Host (Diario):** Tu sistema operativo actual, limpio, para trabajo y uso general.
-2.  **Guest (Windows-G):** Un entorno de consola de videojuegos de alto rendimiento, aislado, que se ejecuta mediante **Native Boot VHDX**.
+2.  **WinBat Console Mode:** Un entorno dedicado a videojuegos y emulación (RetroBat), altamente optimizado y aislado, que se ejecuta mediante **Native Boot VHDX**.
 
-> **Nota:** Este sistema **NO** es una máquina virtual. Windows-G se ejecuta directamente sobre el hardware (Bare Metal), garantizando el máximo rendimiento sin la sobrecarga de un hipervisor.
+### Características Principales
 
-## Arquitectura Técnica
+*   **Rendimiento Nativo:** No es una máquina virtual. El modo consola se ejecuta directamente sobre el hardware (Bare Metal), garantizando máximos FPS y mínima latencia.
+*   **Instalación No Destructiva:** Utiliza una estrategia basada en archivos (VHDX). No re-particiona tu disco duro ni modifica tu sistema Host (salvo la entrada de arranque).
+*   **Aislamiento de Privacidad:** Al arrancar en modo consola, tus discos personales se ocultan para evitar accesos accidentales o modificaciones.
+*   **WinBat Storage Manager:** Una herramienta integrada para montar carpetas de juegos, ISOs o discos externos dentro del modo consola de forma segura y bajo demanda.
+*   **Reversibilidad:** Puedes resetear el modo consola a su estado original en segundos simplemente borrando un archivo.
 
-### Native Boot con VHDX Diferenciales
+---
 
-El núcleo de WinBat se basa en la capacidad nativa de Windows para arrancar desde archivos de disco virtual (VHDX). Implementamos una estrategia de discos padre-hijo:
+## Instalación
 
-*   **WinBat_Base.vhdx (Imagen Inmutable):** Contiene el sistema base optimizado. Este archivo no se modifica durante el uso normal.
-*   **WinBat_Child.vhdx (Disco Diferencial):** Aquí residen todos los cambios del usuario, instalaciones de juegos y configuraciones.
+### Requisitos Previos
+*   Windows 10 o Windows 11 (64 bits).
+*   Privilegios de Administrador.
+*   Al menos **60 GB** de espacio libre en disco.
 
-Esta arquitectura permite la **Reversibilidad Instantánea**: Si el sistema "Windows-G" se corrompe o degrada, basta con borrar el archivo `WinBat_Child.vhdx` para resetear la consola a su estado de fábrica en menos de 1 segundo.
+### Pasos
+1.  **Descargar:** Clona este repositorio o descarga la última versión como ZIP y extráelo en una carpeta accesible.
+2.  **Ejecutar Instalador:**
+    *   Navega a la carpeta `Installer`.
+    *   Haz clic derecho en `Install-WinBat.ps1` y selecciona **"Ejecutar con PowerShell"**.
+    *   *Nota: Si se solicitan permisos de ejecución, acepta o ejecuta previamente `Set-ExecutionPolicy Bypass -Scope Process`.*
+3.  **Configuración:**
+    *   El script te pedirá la ruta de instalación (Por defecto: `C:\WinBat`).
+    *   Se iniciará el proceso de clonación y configuración. Esto puede tardar varios minutos dependiendo de la velocidad de tu disco.
+4.  **Finalizar:**
+    *   Una vez completado, reinicia tu PC.
+    *   Verás una nueva opción en el menú de arranque llamada **"WinBat Console Mode"**.
 
-### Instalación no destructiva en carpeta + Gestor de Montaje Dinámico
+---
 
-A diferencia de otros sistemas duales, WinBat utiliza una estrategia **File-Based** (basada en archivos) para evitar riesgos en tus datos:
+## Uso
 
-1.  **Sin Reparticionado:** No modificamos la estructura física de tu disco duro. No se reduce C: ni se crean particiones nuevas.
-2.  **Instalación Flexible:** El sistema (los archivos VHDX) puede residir en cualquier carpeta elegida por el usuario (ej: `C:\WinBat`, o en un SSD externo).
-3.  **Aislamiento por Software:** Aunque los archivos están en tu disco, Windows-G arranca sin montar las particiones del Host, garantizando privacidad.
+### Primer Arranque (Optimizador)
+La primera vez que inicies en **WinBat Console Mode**, el sistema ejecutará automáticamente el script de optimización (`WinBat_FirstBoot.ps1`).
+*   Se aplicará el plan de energía "Ultimate Performance".
+*   Se desactivarán servicios innecesarios (Telemetría, Indexado).
+*   Se configurará la interfaz de consola (RetroBat).
+*   El sistema se reiniciará automáticamente al terminar.
 
-### Filosofía de Aislamiento "WinUAE/Amiga"
+### WinBat Storage Manager
+Dentro del modo consola, tus discos del Host estarán ocultos por seguridad. Para acceder a tus juegos:
+1.  Desde RetroBat, busca la opción "Storage Manager" (o ejecútala desde la carpeta `WinBat\StorageManager`).
+2.  Introduce el PIN de seguridad (Por defecto: `0000`, configurable en `global_config.ps1`).
+3.  Usa la interfaz para montar carpetas del Host (ej: `D:\Juegos`) como unidades virtuales (ej: `G:\`).
+4.  Estas unidades se volverán a montar automáticamente en cada reinicio.
 
-*   **Aislamiento de Datos:** Cuando `Windows-G` arranca, el disco del sistema Host se marca como **Offline**. El entorno de juegos no tiene acceso a tus documentos, claves o datos personales del Host por defecto.
-*   **Storage Manager:** Usamos un gestor de almacenamiento integrado (compatible con interfaces como RetroBat) que permite "montar" carpetas específicas, ISOs o unidades USB del Host bajo demanda, protegido por mecanismos de seguridad (MFA/PIN).
+---
 
-## Optimización y Rendimiento (Windows-G)
+## Desinstalación
 
-El entorno Guest está diseñado bajo un manifiesto estricto para minimizar latencia y maximizar FPS, sin sacrificar funcionalidades críticas del ecosistema Xbox/Microsoft.
+Para eliminar WinBat completamente de tu sistema:
 
-*   **Conservado:** Xbox Identity, Store Services (GamePass), Drivers firmados, Microsoft Edge.
-*   **Desactivado:** Telemetría, Indexado de búsqueda (en zonas de juego), OneDrive (inicio automático).
-*   **Energía:** Plan "Ultimate Performance" forzado, Game Mode activado.
-*   **Gráficos:** HAGS (Hardware Accelerated GPU Scheduling) gestionado automáticamente.
-*   **Seguridad:** Windows Defender se mantiene **ACTIVO**, pero configurado con exclusiones inteligentes para carpetas de ROMs y juegos para evitar cuellos de botella en I/O.
+1.  **Arranca en tu Windows Host (Normal).**
+2.  **Borrar Archivos:** Elimina la carpeta de instalación (Ej: `C:\WinBat`).
+3.  **Limpiar Arranque:**
+    *   Presiona `Win + R`, escribe `msconfig` y pulsa Enter.
+    *   Ve a la pestaña **Arranque (Boot)**.
+    *   Selecciona la entrada "WinBat Console Mode" y haz clic en **Eliminar**.
+4.  ¡Listo! Tu sistema está limpio.
+
+---
+
+## Disclaimer
+
+**LEER ATENTAMENTE:**
+
+Este software se proporciona "tal cual", sin garantía de ningún tipo. Aunque se han tomado precauciones para garantizar la seguridad (instalación en archivo, puntos de restauración), el uso de herramientas de modificación de sistema conlleva riesgos.
+
+*   Los desarrolladores no se hacen responsables de pérdida de datos.
+*   Se recomienda encarecidamente realizar copias de seguridad antes de la instalación.
+*   Este proyecto respeta las licencias de Microsoft y no incluye herramientas de activación ilegal.
+
+---
 
 ## Estructura del Repositorio
 
-*   `/Installer`: Scripts que se ejecutan desde el sistema Host para preparar las particiones e instalar el VHDX base.
-*   `/Optimizer`: Scripts de post-instalación que corren dentro de Windows-G para aplicar las políticas de rendimiento y limpieza.
-*   `/StorageManager`: Herramientas para el montaje dinámico de recursos y gestión de almacenamiento.
-*   `/Resources`: Archivos de configuración, iconos, plantillas y assets.
-*   `global_config.ps1`: Archivo maestro de configuración y variables.
-
-## Disclaimer de Responsabilidad
-
-**LEER ATENTAMENTE ANTES DE USAR:**
-
-Este software realiza operaciones avanzadas de arranque nativo (Native Boot) y modificación de registros del sistema. Aunque se han tomado medidas para garantizar la seguridad y estabilidad:
-
-1.  **WinBat Suite se proporciona "tal cual", sin garantía de ningún tipo.**
-2.  El uso de estos scripts es bajo su propia responsabilidad.
-3.  Se recomienda encarecidamente realizar una **COPIA DE SEGURIDAD COMPLETA** de sus datos importantes antes de ejecutar el instalador.
-4.  Los desarrolladores no se hacen responsables de pérdida de datos, corrupción del sistema o hardware dañado derivado del uso de estas herramientas.
-5.  Este proyecto no busca eludir protecciones de software ni activar Windows de forma ilegal. Se asume que el usuario posee licencias válidas.
+*   `/Installer`: Scripts de despliegue para el Host.
+*   `/Optimizer`: Scripts de optimización y configuración para el Guest.
+*   `/StorageManager`: Herramientas de gestión de unidades y persistencia.
+*   `/Resources`: Archivos de configuración, idiomas (i18n) y assets.
