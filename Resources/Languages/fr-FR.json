@@ -72,4 +72,11 @@
   "DEP_INSTALLING": "Installation des dépendances (DirectX, VC++, .NET)... Cela peut prendre du temps.",
   "DEP_SUCCESS": "Dépendances installées avec succès.",
   "DEP_FAIL": "Échec de l'installation de certaines dépendances."
+  ,"PKG_TITLE": "WinBat Package Manager"
+  ,"PKG_BTN_IMPORT": "Install Package (.wbpack)"
+  ,"PKG_BTN_CREATE": "Create New Package (Dev Kit)"
+  ,"PKG_BTN_BUILD": "Build Package to File"
+  ,"PKG_SUCCESS_IMPORT": "Package installed successfully. Restart RetroBat."
+  ,"PKG_DEV_INTRO": "Let\x27s create a template for your package. Check the included guide in the generated folder."
+  ,"PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing."
 }

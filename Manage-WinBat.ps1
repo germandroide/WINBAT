@@ -415,6 +415,7 @@ while ($true) {
 
         Write-Host (Get-Tr "MENU_GRP_TOOLS") -ForegroundColor Magenta
         Write-Host "9. $(Get-Tr 'MENU_OPT_DISKGENIUS')"
+        Write-Host "10. $(Get-Tr 'PKG_TITLE')"
 
         Write-Host "0. $(Get-Tr 'MENU_EXIT')"
 
@@ -429,6 +430,7 @@ while ($true) {
             "7" { Run-Snapshot }
             "8" { Run-Restore }
             "9" { Run-DiskGenius }
+            "10" { Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$ScriptPath\Apps\WinBat_PackageManager.ps1`"" -Wait }
             "0" { exit }
         }
     }

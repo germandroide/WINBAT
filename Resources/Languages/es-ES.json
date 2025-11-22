@@ -71,5 +71,12 @@
   "AM_TAB_SYSTEM": "Sistema",
   "DEP_INSTALLING": "Instalando Dependencias (DirectX, VC++, .NET)... Esto puede tardar.",
   "DEP_SUCCESS": "Dependencias instaladas correctamente.",
-  "DEP_FAIL": "Error al instalar algunas dependencias."
+  "DEP_FAIL": "Error al instalar algunas dependencias.",
+  "PKG_TITLE": "Gestor de Paquetes WinBat",
+  "PKG_BTN_IMPORT": "Instalar Paquete (.wbpack)",
+  "PKG_BTN_CREATE": "Crear Nuevo Paquete (Dev Kit)",
+  "PKG_BTN_BUILD": "Compilar Paquete a Archivo",
+  "PKG_SUCCESS_IMPORT": "Paquete instalado correctamente. Reinicia RetroBat.",
+  "PKG_DEV_INTRO": "Vamos a crear una plantilla para tu paquete. Revisa la guía incluida en la carpeta generada.",
+  "PKG_MANIFEST_ERR": "El archivo manifest.json no es válido o falta."
 }

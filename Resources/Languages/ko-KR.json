@@ -72,4 +72,11 @@
   "DEP_INSTALLING": "종속성(DirectX, VC++, .NET) 설치 중... 시간이 걸릴 수 있습니다.",
   "DEP_SUCCESS": "종속성이 성공적으로 설치되었습니다.",
   "DEP_FAIL": "일부 종속성을 설치하지 못했습니다."
+  ,"PKG_TITLE": "WinBat Package Manager"
+  ,"PKG_BTN_IMPORT": "Install Package (.wbpack)"
+  ,"PKG_BTN_CREATE": "Create New Package (Dev Kit)"
+  ,"PKG_BTN_BUILD": "Build Package to File"
+  ,"PKG_SUCCESS_IMPORT": "Package installed successfully. Restart RetroBat."
+  ,"PKG_DEV_INTRO": "Let\x27s create a template for your package. Check the included guide in the generated folder."
+  ,"PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing."
 }

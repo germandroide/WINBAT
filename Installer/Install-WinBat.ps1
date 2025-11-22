@@ -83,6 +83,16 @@ try {
         $InstallPath = $InputPath
     }
 
+    # Update Global Config with user selection (Persistence for Admin Console)
+    if ($InstallPath -ne $Global:WB_InstallPath) {
+        Write-Host "Updating global configuration with new path..."
+        $ConfigContent = Get-Content $GlobalConfigPath
+        $NewConfigContent = $ConfigContent -replace '^\$Global:WB_InstallPath\s+=.*', "`$Global:WB_InstallPath          = `"$InstallPath`""
+        Set-Content -Path $GlobalConfigPath -Value $NewConfigContent
+        # Reload config
+        . $GlobalConfigPath
+    }
+
     # Ensure path exists
     if (-not (Test-Path $InstallPath)) {
         New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
