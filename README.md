@@ -89,3 +89,26 @@ Este software se proporciona "tal cual", sin garantía de ningún tipo. Aunque s
 *   `/Optimizer`: Scripts de optimización y configuración para el Guest.
 *   `/StorageManager`: Herramientas de gestión de unidades y persistencia.
 *   `/Resources`: Archivos de configuración, idiomas (i18n) y assets.
+
+---
+
+## Licencia y Copyright
+
+**Copyright (c) 2024 Germán Company Mangano**
+
+Este proyecto está licenciado bajo la **Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)**.
+
+### Usted es libre de:
+*   **Compartir** — copiar y redistribuir el material en cualquier medio o formato.
+*   **Adaptar** — remezclar, transformar y crear a partir del material.
+
+### Bajo las siguientes condiciones:
+*   **Atribución** — Debe dar crédito de manera adecuada, brindar un enlace a la licencia, e indicar si se han realizado cambios. Puede hacerlo en cualquier forma razonable, pero no de forma tal que sugiera que usted o su uso tienen el apoyo del licenciante.
+*   **NoComercial** — **No puede hacer uso del material con fines comerciales.**
+*   **CompartirIgual** — Si remezcla, transforma o crea a partir del material, debe distribuir su contribución bajo la misma licencia del original.
+
+![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
+
+Para ver una copia de esta licencia, visite [http://creativecommons.org/licenses/by-nc-sa/4.0/](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+> **Nota sobre Software:** Aunque esta licencia se aplica comúnmente a obras creativas, en el contexto de este proyecto, se aplica al código fuente, scripts y documentación para prohibir explícitamente la explotación comercial sin consentimiento previo del autor.

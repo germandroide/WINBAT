@@ -71,12 +71,38 @@
   "AM_TAB_SYSTEM": "系统",
   "DEP_INSTALLING": "正在安装依赖项 (DirectX, VC++, .NET)... 这可能需要一些时间。",
   "DEP_SUCCESS": "依赖项安装成功。",
-  "DEP_FAIL": "安装部分依赖项失败。"
-  ,"PKG_TITLE": "WinBat Package Manager"
-  ,"PKG_BTN_IMPORT": "Install Package (.wbpack)"
-  ,"PKG_BTN_CREATE": "Create New Package (Dev Kit)"
-  ,"PKG_BTN_BUILD": "Build Package to File"
-  ,"PKG_SUCCESS_IMPORT": "Package installed successfully. Restart RetroBat."
-  ,"PKG_DEV_INTRO": "Let\x27s create a template for your package. Check the included guide in the generated folder."
-  ,"PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing."
+  "DEP_FAIL": "安装部分依赖项失败。",
+  "PKG_TITLE": "WinBat Package Manager",
+  "PKG_BTN_IMPORT": "Install Package (.wbpack)",
+  "PKG_BTN_CREATE": "Create New Package (Dev Kit)",
+  "PKG_BTN_BUILD": "Build Package to File",
+  "PKG_SUCCESS_IMPORT": "Package installed successfully. Restart RetroBat.",
+  "PKG_DEV_INTRO": "Let's create a template for your package. Check the included guide in the generated folder.",
+  "PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing.",
+  "MENU_TITLE": "WinBat Admin Console",
+  "MENU_GRP_LIFECYCLE": "1. Lifecycle Management",
+  "MENU_GRP_BOOT": "2. Boot Manager",
+  "MENU_GRP_BACKUP": "3. Backup & Portability",
+  "MENU_GRP_HOST": "4. Host Optimizer",
+  "MENU_GRP_TOOLS": "5. External Tools",
+  "MENU_OPT_INSTALL": "Install / Reinstall / Repair",
+  "MENU_OPT_UNINSTALL": "Uninstall WinBat",
+  "MENU_OPT_DEFAULT_WINBAT": "Set Default Boot: WinBat",
+  "MENU_OPT_DEFAULT_HOST": "Set Default Boot: Windows Host",
+  "MENU_OPT_TIMEOUT_0": "Set Boot Timeout: 0s (Instant)",
+  "MENU_OPT_TIMEOUT_30": "Set Boot Timeout: 30s",
+  "MENU_OPT_SNAPSHOT": "Create Snapshot (Backup Configs)",
+  "MENU_OPT_RESTORE": "Restore Snapshot",
+  "MENU_OPT_HOST_DEBLOAT": "Run Host Debloat (Remove Appx)",
+  "MENU_OPT_SECURITY": "Apply Security Hardening",
+  "MENU_OPT_GAMEREMOVER": "Scan for Game Launchers to Remove",
+  "MENU_OPT_DISKGENIUS": "Launch DiskGenius",
+  "MENU_EXIT": "Exit",
+  "MSG_REINSTALL_PROMPT": "Existing Data folder found. [K]eep (Repair) or [W]ipe (Fresh Install)?",
+  "MSG_DATA_FOUND_KEEP": "Keeping existing Data folder. Repairing VHDX only.",
+  "MSG_DATA_FOUND_WIPE": "Wiping Data folder for fresh install.",
+  "MSG_SNAPSHOT_CREATED": "Snapshot created successfully at: {0}",
+  "MSG_RESTORE_DONE": "Snapshot restored successfully.",
+  "MSG_UNINSTALL_CONFIRM": "Are you sure you want to uninstall WinBat? This will delete the VHDX files.",
+  "MSG_UNINSTALL_DATA": "Do you also want to delete the 'Data' folder (ROMS/Configs)? (Y/N)"
 }
