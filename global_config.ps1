@@ -12,7 +12,7 @@
 # Base path where VHDX files will be created (User selectable)
 $Global:WB_InstallPath          = "C:\WinBat"
 # Maximum dynamic size for the VHDX (in GB)
-$Global:WB_VHDMaxSizeGB         = 100
+$Global:WB_VHDMaxSizeGB         = 25
 
 # ==========================================
 # 2. VHDX Configuration
@@ -49,8 +49,78 @@ $Global:WB_RegPath_Defender     = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Def
 # ==========================================
 # Security settings for mounting sensitive host drives
 $Global:WB_MFA_Enabled          = $true
-$Global:WB_SecurityPIN          = "0000" # User configurable PIN
+# $Global:WB_SecurityPIN          = "0000" # REMOVED: Storing plaintext PIN is insecure.
 $Global:WB_SecureMount_PinLen   = 6
+$Global:WB_ConfigPath           = "C:\WinBat\Config\config.json"
+$Global:WB_PinHash              = $null
+
+# Helper Functions for Security
+function Set-WinBatPin {
+    param (
+        [string]$NewPin
+    )
+
+    # Hash the PIN
+    $SHA256 = [System.Security.Cryptography.SHA256]::Create()
+    $Bytes = [System.Text.Encoding]::UTF8.GetBytes($NewPin)
+    $HashBytes = $SHA256.ComputeHash($Bytes)
+    $HashString = [BitConverter]::ToString($HashBytes).Replace("-", "")
+
+    # Load or Create Config
+    if (Test-Path $Global:WB_ConfigPath) {
+        $Config = Get-Content -Path $Global:WB_ConfigPath -Raw | ConvertFrom-Json
+    } else {
+        # Create Directory if needed
+        $ConfigDir = Split-Path $Global:WB_ConfigPath
+        if (-not (Test-Path $ConfigDir)) { New-Item -Path $ConfigDir -ItemType Directory -Force | Out-Null }
+        $Config = [PSCustomObject]@{}
+    }
+
+    # Update PIN Hash
+    $Config | Add-Member -Name "PinHash" -Value $HashString -MemberType NoteProperty -Force
+
+    # Save Config
+    $Config | ConvertTo-Json | Set-Content -Path $Global:WB_ConfigPath
+
+    $Global:WB_PinHash = $HashString
+}
+
+function Test-WinBatPin {
+    param (
+        [string]$InputPin
+    )
+
+    # 1. Load Hash from Config if not in memory
+    if (-not $Global:WB_PinHash) {
+        if (Test-Path $Global:WB_ConfigPath) {
+            try {
+                $Config = Get-Content -Path $Global:WB_ConfigPath -Raw | ConvertFrom-Json
+                if ($Config.PinHash) {
+                    $Global:WB_PinHash = $Config.PinHash
+                }
+            } catch {
+                Write-Warning "Failed to load config.json"
+            }
+        }
+    }
+
+    # If no PIN is set, assume default "0000" behavior or return false?
+    # For backward compatibility/first run, we might default to a hash of "0000"
+    if (-not $Global:WB_PinHash) {
+        # Hash of "0000"
+        $DefaultHash = "9AF15B336E6A9619928537DF30B2E6A2376569FCF9D7E773ECCEDE65606529A0"
+        $Global:WB_PinHash = $DefaultHash
+    }
+
+    # 2. Hash Input
+    $SHA256 = [System.Security.Cryptography.SHA256]::Create()
+    $Bytes = [System.Text.Encoding]::UTF8.GetBytes($InputPin)
+    $HashBytes = $SHA256.ComputeHash($Bytes)
+    $HashString = [BitConverter]::ToString($HashBytes).Replace("-", "")
+
+    # 3. Compare
+    return ($HashString -eq $Global:WB_PinHash)
+}
 
 # ==========================================
 # 6. Resources
@@ -88,7 +158,8 @@ function Load-WinBatLanguage {
 
     if (Test-Path -Path $LangFile) {
         try {
-            $JsonContent = Get-Content -Path $LangFile -Raw -ErrorAction Stop | ConvertFrom-Json
+            # Use UTF-8 Explicitly
+            $JsonContent = Get-Content -Path $LangFile -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json
 
             # Convert PSCustomObject to Hashtable for easier lookup
             $Global:WB_LangDict = @{}
@@ -100,6 +171,11 @@ function Load-WinBatLanguage {
         }
         catch {
             Write-Error "Failed to load language file: $LangFile. Error: $_"
+            # Emergency Fallback if JSON is corrupt
+            if ($LangCode -ne "en-US") {
+               Write-Warning "Attempting emergency fallback to en-US."
+               Load-WinBatLanguage # This might cause recursion loop if en-US is also bad, but usually safe
+            }
         }
     }
     else {

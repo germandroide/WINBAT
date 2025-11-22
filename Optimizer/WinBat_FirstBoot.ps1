@@ -52,12 +52,55 @@ try {
     Checkpoint-Computer -Description "Pre-WinBat-Optimization" -RestorePointType "MODIFY_SETTINGS" -ErrorAction SilentlyContinue
 
     # ==========================================
-    # 2. Host Isolation (Hide Drives)
+    # 1.5. Validate Windows Activation (Hardware ID)
+    # ==========================================
+    Write-Host "Re-validating Windows License (Hardware ID)..."
+    # Force activation against MS servers using the inherited digital license
+    Start-Process "slmgr.exe" -ArgumentList "/ato" -WindowStyle Hidden -Wait
+
+    # ==========================================
+    # 2. Mount Host Data & Host Isolation
     # ==========================================
     Write-Host (Get-Tr "OPT_ISOLATING_DRIVES")
 
+    # 2a. Find External Data Folder
+    Write-Host "Scanning for WinBat Data (Deep Scan)..."
+    $DataDriveLetter = $null
+
+    # Get all drives
+    $Drives = Get-PSDrive -PSProvider FileSystem
+    foreach ($D in $Drives) {
+        if ($D.Name -eq "C") { continue } # Skip Guest C:
+
+        # Deep scan for marker file (Depth 2 to catch X:\Games\WinBat\Data)
+        try {
+             $Marker = Get-ChildItem -Path $D.Root -Recurse -Depth 3 -Filter ".winbat_marker" -ErrorAction SilentlyContinue | Select-Object -First 1
+             if ($Marker) {
+                $DataDriveLetter = $D.Name
+                $DataPath = $Marker.DirectoryName
+
+                Write-Host "Found Data on Drive $($DataDriveLetter): at $DataPath" -ForegroundColor Cyan
+
+                # Mount to B: (Base)
+                if (-not (Test-Path "B:")) {
+                    Write-Host "Mounting Data to B:..."
+                    subst B: "$DataPath"
+                }
+
+                # Create Symlink C:\RetroBat -> B:\RetroBat
+                if (-not (Test-Path "C:\RetroBat")) {
+                    cmd /c mklink /D "C:\RetroBat" "B:\RetroBat" | Out-Null
+                }
+                break
+             }
+        } catch {
+             Write-Warning "Failed to scan drive $($D.Name)"
+        }
+    }
+
+    # 2b. Hide Other Drives
     # Logic: Get all partitions. If they are NOT the Boot partition or the Current System partition (C:), remove drive letter.
-    # Note: In VHD Native Boot, C: is the VHD. Physical drives are visible.
+    # EXCEPTION: Do not remove the drive letter of the Data Drive ($DataDriveLetter), otherwise subst B: fails.
 
     $SystemPart = Get-Partition | Where-Object { $_.DriveLetter -eq "C" }
     $BootPart = Get-Partition | Where-Object { $_.IsBoot -eq $true }
@@ -70,6 +113,12 @@ try {
 
         # Skip EFI/Boot partition (if visible)
         if ($Part.IsBoot -eq $true) { continue }
+
+        # Skip Data Drive (Host Partition containing WinBat Data)
+        if ($DataDriveLetter -ne $null -and $Part.DriveLetter -eq $DataDriveLetter) {
+             Write-Host "Keeping Data Drive $($Part.DriveLetter): Visible (Mounted as B:)" -ForegroundColor Gray
+             continue
+        }
 
         # Remove Drive Letter
         Write-Host ($Global:WB_LangDict["OPT_HIDING_DRIVE"] -f $Part.DriveLetter) -ForegroundColor Gray
@@ -181,7 +230,34 @@ try {
         Set-Content -Path $RetroBatExe -Value "Placeholder"
     }
 
-    # 7c. Create Shell Launcher Wrapper
+    # 7c. Install Dependencies (Critical Fix - Chicken & Egg)
+    # RetroBat needs VC++ runtimes before it can even start.
+    # We run this BEFORE changing the shell to ensure success.
+    Write-Host "Installing Critical Runtimes..."
+    $DepScript = "C:\WinBat\Optimizer\WinBat_Dependencies.ps1"
+    if (Test-Path $DepScript) {
+        $Proc = Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File $DepScript" -Wait -PassThru
+        if ($Proc.ExitCode -ne 0) {
+            Write-Warning "Dependency installation might have failed or was cancelled."
+        }
+    } else {
+        Write-Warning "Dependency script not found at $DepScript"
+    }
+
+    # 7d. Configure AntiMicroX Startup (Controller Support)
+    Write-Host "Configuring AntiMicroX..."
+    $AMExe = "C:\WinBat\System\AntiMicroX\antimicrox.exe"
+    $AMProfile = "C:\WinBat\Resources\mouse_profile.gamecontroller.amgp"
+
+    if (Test-Path $AMExe) {
+        $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+        if (-not (Test-Path $RunKey)) { New-Item -Path $RunKey -Force | Out-Null }
+
+        $AMCmd = "`"$AMExe`" --hidden --profile `"$AMProfile`""
+        Set-ItemProperty -Path $RunKey -Name "AntiMicroX" -Value $AMCmd -Type String
+    }
+
+    # 7e. Create Shell Launcher Wrapper
     # Standard Run/RunOnce keys don't fire if Explorer isn't the shell.
     # We create a wrapper to launch services and OOBE before RetroBat.
     $LauncherPath = "C:\WinBat\ShellLauncher.ps1"
@@ -192,16 +268,11 @@ try {
 # 1. Start Mount Service
 Start-Process PowerShell.exe -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File C:\WinBat\StorageManager\WinBat_MountService.ps1" -WindowStyle Hidden
 
-# 2. Check for OOBE / Dependencies
+# 2. Check for OOBE
 `$OobeFlag = "C:\WinBat\Config\OOBE_Done.flag"
 if (-not (Test-Path `$OobeFlag)) {
-    # First Run Dependencies
-    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Optimizer\WinBat_Dependencies.ps1" -Wait
-
+    # Dependencies are now installed in FirstBoot, but we keep this check or just App Manager
     # Run OOBE App Manager (Welcome Mode is just the App Manager opened first time)
-    # We can just open the App Manager. The OOBE folder/script might be redundant if we unify,
-    # but the prompt asked for App Manager to have OOBE mode.
-    # For now, we launch App Manager.
     Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Apps\WinBat_AppManager.ps1" -Wait
 
     New-Item -Path `$OobeFlag -ItemType File -Force | Out-Null
@@ -216,7 +287,7 @@ while (`$true) {
 "@
     Set-Content -Path $LauncherPath -Value $LauncherContent
 
-    # 7d. Change Shell (Registry) to Wrapper
+    # 7f. Change Shell (Registry) to Wrapper
     Write-Host (Get-Tr "OPT_SHELL_CHANGE")
 
     $ShellKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System"

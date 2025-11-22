@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gamecontroller configversion="19" appversion="3.3.3">
+    <!-- WinBat Controller Profile: Left Stick Mouse, A=Click, B=Right Click -->
+    <sdl2gamecontroller>
+        <button index="0" label="A">
+            <slots>
+                <slot>
+                    <code>1</code> <!-- Left Mouse Button -->
+                    <mode>mousebutton</mode>
+                </slot>
+            </slots>
+        </button>
+        <button index="1" label="B">
+            <slots>
+                <slot>
+                    <code>3</code> <!-- Right Mouse Button -->
+                    <mode>mousebutton</mode>
+                </slot>
+            </slots>
+        </button>
+        <axis index="0" label="Left Stick X">
+            <throttle>normal</throttle>
+            <axisbutton index="0">
+                <slots>
+                    <slot>
+                        <code>4</code> <!-- Mouse Left -->
+                        <mode>mousemovement</mode>
+                    </slot>
+                </slots>
+            </axisbutton>
+            <axisbutton index="1">
+                <slots>
+                    <slot>
+                        <code>5</code> <!-- Mouse Right -->
+                        <mode>mousemovement</mode>
+                    </slot>
+                </slots>
+            </axisbutton>
+        </axis>
+        <axis index="1" label="Left Stick Y">
+            <throttle>normal</throttle>
+            <axisbutton index="0">
+                <slots>
+                    <slot>
+                        <code>1</code> <!-- Mouse Up -->
+                        <mode>mousemovement</mode>
+                    </slot>
+                </slots>
+            </axisbutton>
+            <axisbutton index="1">
+                <slots>
+                    <slot>
+                        <code>2</code> <!-- Mouse Down -->
+                        <mode>mousemovement</mode>
+                    </slot>
+                </slots>
+            </axisbutton>
+        </axis>
+    </sdl2gamecontroller>
+</gamecontroller>

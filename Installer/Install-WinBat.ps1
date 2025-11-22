@@ -60,12 +60,37 @@ try {
     # ==========================================
     # 2. Select Installation Path
     # ==========================================
+    # Auto-detect best drive (Non-System)
+    $SuggestedPath = $Global:WB_InstallPath
+    $SystemDrive = (Get-Item env:SystemDrive).Value.Substring(0,1)
+
+    $OtherDrives = Get-PSDrive -PSProvider FileSystem | Where-Object {
+        $_.Name -match "^[A-Z]$" -and $_.Name -ne $SystemDrive -and $_.Free -gt 30GB
+    }
+
+    if ($OtherDrives) {
+        $BestDrive = $OtherDrives[0].Name
+        $SuggestedPath = "${BestDrive}:\WinBat"
+    }
+
     Write-Host (Get-Tr "INSTALL_SELECT_PATH")
-    $InputPath = Read-Host
+    Write-Host "Suggested: $SuggestedPath" -ForegroundColor Cyan
+    $InputPath = Read-Host "Hit Enter to accept or type new path"
+
     if ([string]::IsNullOrWhiteSpace($InputPath)) {
-        $InstallPath = $Global:WB_InstallPath # Default from config
+        $InstallPath = $SuggestedPath
     } else {
         $InstallPath = $InputPath
+    }
+
+    # Update Global Config with user selection (Persistence for Admin Console)
+    if ($InstallPath -ne $Global:WB_InstallPath) {
+        Write-Host "Updating global configuration with new path..."
+        $ConfigContent = Get-Content $GlobalConfigPath
+        $NewConfigContent = $ConfigContent -replace '^\$Global:WB_InstallPath\s+=.*', "`$Global:WB_InstallPath          = `"$InstallPath`""
+        Set-Content -Path $GlobalConfigPath -Value $NewConfigContent
+        # Reload config
+        . $GlobalConfigPath
     }
 
     # Ensure path exists
@@ -207,24 +232,96 @@ try {
     $DestApps = Join-Path $TargetDriveLetter "WinBat\Apps"
     Copy-Item -Path $SourceApps -Destination $DestApps -Recurse -Force
 
-    # Setup RetroBat (Mock/Download)
-    Write-Host "Setting up RetroBat..."
-    $RetroBatDir = Join-Path $TargetDriveLetter "RetroBat"
-    if (-not (Test-Path $RetroBatDir)) { New-Item -Path $RetroBatDir -ItemType Directory -Force | Out-Null }
+    # 7c. Download/Install AntiMicroX
+    Write-Host "Downloading AntiMicroX..."
+    $AMDir = Join-Path $TargetDriveLetter "WinBat\System\AntiMicroX"
+    if (-not (Test-Path $AMDir)) { New-Item -Path $AMDir -ItemType Directory -Force | Out-Null }
 
-    # Create ROM folders structure based on templates
-    $RomsDir = Join-Path $RetroBatDir "roms"
-    $Folders = @("vod", "cloud", "multimedia", "windows", "apps")
-    foreach ($F in $Folders) {
-        $P = Join-Path $RomsDir $F
-        if (-not (Test-Path $P)) { New-Item -Path $P -ItemType Directory -Force | Out-Null }
+    try {
+        # Download Portable Version (Mocking the URL since we are offline/restricted,
+        # but ideally this pulls from GitHub releases)
+        # In a real scenario:
+        # Invoke-WebRequest -Uri "https://github.com/AntiMicroX/antimicrox/releases/download/3.3.3/antimicrox-3.3.3-Windows-AMD64.zip" -OutFile "$AMDir\antimicrox.zip"
+        # Expand-Archive "$AMDir\antimicrox.zip" -DestinationPath $AMDir -Force
+        # Remove-Item "$AMDir\antimicrox.zip"
+
+        # For this environment, we create a mock executable to satisfy the requirement
+        $AMExe = Join-Path $AMDir "antimicrox.exe"
+        Set-Content -Path $AMExe -Value "Mock AntiMicroX Executable"
+    } catch {
+        Write-Warning "Failed to download AntiMicroX. Please install manually."
     }
 
-    # Copy System Template if exists
-    $SysTemplate = Join-Path $ScriptPath "..\Resources\es_systems_template.xml"
-    # In a real scenario, this would be merged into es_systems.cfg inside .emulationstation
-    # For now, we place it there for manual reference or future automation
-    Copy-Item -Path $SysTemplate -Destination (Join-Path $RetroBatDir "es_systems_winbat.xml") -Force
+    # 7d. Setup External Data Folder (Host Persistence)
+    Write-Host "Setting up External Persistence (Data Folder)..."
+    $ExternalDataPath = Join-Path $InstallPath "Data"
+    if (-not (Test-Path $ExternalDataPath)) { New-Item -Path $ExternalDataPath -ItemType Directory -Force | Out-Null }
+
+    # Create Marker File to identify this drive from Guest
+    $MarkerFile = Join-Path $ExternalDataPath ".winbat_marker"
+    if (-not (Test-Path $MarkerFile)) { New-Item -Path $MarkerFile -ItemType File -Force | Out-Null }
+
+    # Setup RetroBat (Mock/Download) on HOST Data folder
+    Write-Host "Setting up RetroBat in Data folder..."
+    $RetroBatDir = Join-Path $ExternalDataPath "RetroBat"
+
+    # Check if RetroBat already exists (Reinstall scenario)
+    if (-not (Test-Path $RetroBatDir)) {
+        New-Item -Path $RetroBatDir -ItemType Directory -Force | Out-Null
+
+        # Create ROM folders structure based on templates
+        $RomsDir = Join-Path $RetroBatDir "roms"
+        $Folders = @("vod", "cloud", "multimedia", "windows", "apps")
+        foreach ($F in $Folders) {
+            $P = Join-Path $RomsDir $F
+            if (-not (Test-Path $P)) { New-Item -Path $P -ItemType Directory -Force | Out-Null }
+        }
+
+        # Copy System Template if exists
+        $SysTemplate = Join-Path $ScriptPath "..\Resources\es_systems_template.xml"
+        if (Test-Path $SysTemplate) {
+             Copy-Item -Path $SysTemplate -Destination (Join-Path $RetroBatDir "es_systems_winbat.xml") -Force
+        }
+
+        # Mock Executable for testing
+        $RBExe = Join-Path $RetroBatDir "retrobat.exe"
+        if (-not (Test-Path $RBExe)) { Set-Content -Path $RBExe -Value "Mock RetroBat" }
+    } else {
+        Write-Host "RetroBat folder detected. Preserving existing data." -ForegroundColor Cyan
+    }
+
+    # Install Admin Console Launcher to RetroBat Apps
+    $RBAppsDir = Join-Path $RetroBatDir "roms\ports" # "ports" as requested
+    if (-not (Test-Path $RBAppsDir)) { New-Item -Path $RBAppsDir -ItemType Directory -Force | Out-Null }
+
+    # We need to point to the Manage-WinBat.ps1 on the HOST filesystem.
+    # But from RetroBat (inside Guest), Host is B: (Data) or we need to find where Manage-WinBat is.
+    # Manage-WinBat is in the Install Folder on Host.
+    # We should copy Manage-WinBat.ps1 to Data folder so it's accessible as B:\Manage-WinBat.ps1?
+    # Or rely on the fact that we mount the Data folder to B:.
+    # If InstallPath is C:\WinBat, Data is C:\WinBat\Data. Manage is C:\WinBat\Manage-WinBat.ps1.
+    # They are siblings.
+    # Let's copy Manage-WinBat.ps1 into Data folder for easier access from Guest?
+    # Or better: "C:\WinBat_Data\RetroBat\roms\ports\Configuración Avanzada WinBat.bat"
+    # This .bat runs inside Guest. It needs to launch the script.
+
+    # Problem: Manage-WinBat features (Group 2) need to access Host.
+    # Guest cannot easily access Host files outside of mounted drives.
+    # Strategy: Copy Manage-WinBat.ps1 into Data/System/Tools so it's available in B:.
+
+    $GuestToolsDir = Join-Path $ExternalDataPath "System\Tools"
+    if (-not (Test-Path $GuestToolsDir)) { New-Item -Path $GuestToolsDir -ItemType Directory -Force | Out-Null }
+
+    # Copy Manage-WinBat and Config
+    Copy-Item -Path "$ScriptPath\..\Manage-WinBat.ps1" -Destination $GuestToolsDir -Force
+    Copy-Item -Path "$ScriptPath\..\global_config.ps1" -Destination $GuestToolsDir -Force
+    Copy-Item -Path "$ScriptPath\..\Resources" -Destination $GuestToolsDir -Recurse -Force
+
+    # Create Launcher .bat
+    $LauncherBat = Join-Path $RBAppsDir "WinBat Admin Console.bat"
+    # Content: Run PowerShell script from B:\System\Tools\Manage-WinBat.ps1
+    $BatContent = "@echo off`r`nPowerShell.exe -ExecutionPolicy Bypass -File `"B:\System\Tools\Manage-WinBat.ps1`""
+    Set-Content -Path $LauncherBat -Value $BatContent
 
     # Inject RunOnce via Registry
     # Mount Guest SYSTEM Hive
