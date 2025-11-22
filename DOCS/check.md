@@ -1,6 +1,6 @@
 # Verificación de Código y Coherencia - WinBat Suite
 
-Este documento certifica la revisión técnica de los scripts y módulos de WinBat Suite tras la implementación final.
+Este documento certifica la revisión técnica de los scripts y módulos de WinBat Suite tras la implementación de los Sprints 6, 7 y 8.
 
 ## 1. Verificación de Flujos Críticos
 
