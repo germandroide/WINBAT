@@ -282,6 +282,113 @@ function Run-DiskGenius {
     Pause
 }
 
+function Run-DriverSync {
+    Write-Host (Get-Tr "DRV_SYNC_TITLE") -ForegroundColor Cyan
+    Write-Host "Scanning for Third-Party Host Drivers..."
+
+    # List Drivers
+    $Drivers = Get-WindowsDriver -Online -All | Where-Object { $_.ProviderName -ne "Microsoft" -and $_.ClassName -ne "System" }
+
+    if ($Drivers.Count -eq 0) {
+        Write-Warning "No third-party drivers found suitable for sync."
+        Pause
+        return
+    }
+
+    # UI Selection (CLI Fallback or Out-GridView)
+    Write-Host (Get-Tr "DRV_SELECT_MSG")
+
+    # Try Out-GridView first
+    try {
+        $Selected = $Drivers | Select-Object ClassName, ProviderName, Version, OriginalFileName | Out-GridView -Title "WinBat Driver Sync" -PassThru
+    } catch {
+        # Fallback to CLI menu if GUI fails (e.g. Core server)
+        $i = 1
+        foreach ($D in $Drivers) {
+            Write-Host "$i. [$($D.ClassName)] $($D.ProviderName) - $($D.Version)"
+            $i++
+        }
+        $InputIndices = Read-Host "Enter IDs to sync (comma separated)"
+        $Selected = @()
+        $Indices = $InputIndices -split ","
+        foreach ($Idx in $Indices) {
+            if ($Idx -match "^\d+$" -and $Idx -le $Drivers.Count) {
+                $Selected += $Drivers[$Idx-1]
+            }
+        }
+    }
+
+    if ($Selected) {
+        # Export to Temp
+        $TempDriverDir = Join-Path $Global:WB_InstallPath "Temp\Drivers_To_Inject"
+        if (Test-Path $TempDriverDir) { Remove-Item $TempDriverDir -Recurse -Force }
+        New-Item -Path $TempDriverDir -ItemType Directory -Force | Out-Null
+
+        Write-Host "Exporting $(($Selected).Count) drivers..." -ForegroundColor Yellow
+
+        foreach ($Drv in $Selected) {
+            # Export-WindowsDriver exports ALL. We need specific.
+            # Use pnputil /export-driver <inf> <dest>
+            $InfName = Split-Path $Drv.OriginalFileName -Leaf
+            Write-Host "  -> Exporting $InfName..."
+
+            # pnputil syntax: /export-driver <inf> <dest>
+            # Note: OriginalFileName usually is full path to DriverStore file
+            # We just need the published name (oemXX.inf) or the path.
+            # Get-WindowsDriver returns 'Driver' property as 'oem12.inf'.
+            # Use the 'Driver' property (published name).
+
+            $PubName = $Drv.Driver
+            Start-Process "pnputil.exe" -ArgumentList "/export-driver `"$PubName`" `"$TempDriverDir`"" -Wait -NoNewWindow
+        }
+
+        # Inject into VHDX (Child)
+        $VHDXPath = Join-Path $Global:WB_InstallPath $Global:WB_VHDXName_Child
+
+        if (-not (Test-Path $VHDXPath)) {
+            Write-Error "WinBat_Child.vhdx not found."
+            Pause
+            return
+        }
+
+        Write-Host "Mounting VHDX..."
+        try {
+            $Mounted = Mount-DiskImage -ImagePath $VHDXPath -PassThru
+            $DriveLetter = ($Mounted | Get-Volume).DriveLetter
+
+            if (-not $DriveLetter) {
+                # Assign letter if missing
+                $DiskNum = $Mounted.Number
+                $Part = Get-Partition -DiskNumber $DiskNum | Where-Object { $_.Size -gt 5GB } # Assume largest is OS
+                if ($Part) {
+                    Set-Partition -InputObject $Part -NewDriveLetter "Z"
+                    $DriveLetter = "Z"
+                } else {
+                    throw "Could not determine VHDX Drive Letter."
+                }
+            }
+
+            $MountDir = "$($DriveLetter):\"
+
+            Write-Host "Injecting Drivers into $MountDir..." -ForegroundColor Cyan
+
+            # DISM Add-Driver
+            Start-Process "dism.exe" -ArgumentList "/Image:$MountDir /Add-Driver /Driver:`"$TempDriverDir`" /Recurse" -Wait -NoNewWindow
+
+            Write-Host (Get-Tr "DRV_INJECT_SUCCESS") -ForegroundColor Green
+
+        } catch {
+            Write-Error "Injection Failed: $_"
+        } finally {
+            Write-Host "Dismounting..."
+            Dismount-DiskImage -ImagePath $VHDXPath | Out-Null
+            # Cleanup Temp
+            Remove-Item $TempDriverDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+    Pause
+}
+
 # ==========================================
 # Offline Host Management Functions
 # ==========================================
@@ -425,6 +532,7 @@ while ($true) {
         Write-Host (Get-Tr "MENU_GRP_TOOLS") -ForegroundColor Magenta
         Write-Host "9. $(Get-Tr 'MENU_OPT_DISKGENIUS')"
         Write-Host "10. $(Get-Tr 'PKG_TITLE')"
+        Write-Host "11. $(Get-Tr 'DRV_SYNC_TITLE')"
 
         Write-Host "0. $(Get-Tr 'MENU_EXIT')"
 
@@ -440,6 +548,7 @@ while ($true) {
             "8" { Run-Restore }
             "9" { Run-DiskGenius }
             "10" { Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$ScriptPath\Apps\WinBat_PackageManager.ps1`"" -Wait }
+            "11" { Run-DriverSync }
             "0" { exit }
         }
     }

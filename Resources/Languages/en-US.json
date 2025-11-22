@@ -107,5 +107,8 @@
   "PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing.",
   "STATUS_EXPORTING_DRIVERS": "Exporting host drivers...",
   "STATUS_PURGING_COMPONENTS": "Removing unnecessary Windows components...",
-  "STATUS_COMPACTING": "Applying LZX compression..."
+  "STATUS_COMPACTING": "Applying LZX compression...",
+  "DRV_SYNC_TITLE": "Host -> WinBat Driver Sync",
+  "DRV_SELECT_MSG": "Select drivers to copy:",
+  "DRV_INJECT_SUCCESS": "Drivers injected successfully. Available on next boot."
 }
