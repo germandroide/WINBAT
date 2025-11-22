@@ -13,6 +13,10 @@
 
     This file contains central variables used by all scripts in the WinBat Suite.
     It ensures consistency across Installer, Optimizer, and StorageManager modules.
+
+    LEGAL NOTICE:
+    This software interacts with and configures third-party components (Microsoft Windows, RetroBat, AntiMicroX).
+    See NOTICE.md for full license attributions and legal disclaimers regarding third-party software.
 #>
 
 # ==========================================
