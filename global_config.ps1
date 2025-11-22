@@ -158,7 +158,8 @@ function Load-WinBatLanguage {
 
     if (Test-Path -Path $LangFile) {
         try {
-            $JsonContent = Get-Content -Path $LangFile -Raw -ErrorAction Stop | ConvertFrom-Json
+            # Use UTF-8 Explicitly
+            $JsonContent = Get-Content -Path $LangFile -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json
 
             # Convert PSCustomObject to Hashtable for easier lookup
             $Global:WB_LangDict = @{}
@@ -170,6 +171,11 @@ function Load-WinBatLanguage {
         }
         catch {
             Write-Error "Failed to load language file: $LangFile. Error: $_"
+            # Emergency Fallback if JSON is corrupt
+            if ($LangCode -ne "en-US") {
+               Write-Warning "Attempting emergency fallback to en-US."
+               Load-WinBatLanguage # This might cause recursion loop if en-US is also bad, but usually safe
+            }
         }
     }
     else {
