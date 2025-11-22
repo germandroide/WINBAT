@@ -227,24 +227,43 @@ try {
         Write-Warning "Failed to download AntiMicroX. Please install manually."
     }
 
-    # Setup RetroBat (Mock/Download)
-    Write-Host "Setting up RetroBat..."
-    $RetroBatDir = Join-Path $TargetDriveLetter "RetroBat"
-    if (-not (Test-Path $RetroBatDir)) { New-Item -Path $RetroBatDir -ItemType Directory -Force | Out-Null }
+    # 7d. Setup External Data Folder (Host Persistence)
+    Write-Host "Setting up External Persistence (Data Folder)..."
+    $ExternalDataPath = Join-Path $InstallPath "Data"
+    if (-not (Test-Path $ExternalDataPath)) { New-Item -Path $ExternalDataPath -ItemType Directory -Force | Out-Null }
 
-    # Create ROM folders structure based on templates
-    $RomsDir = Join-Path $RetroBatDir "roms"
-    $Folders = @("vod", "cloud", "multimedia", "windows", "apps")
-    foreach ($F in $Folders) {
-        $P = Join-Path $RomsDir $F
-        if (-not (Test-Path $P)) { New-Item -Path $P -ItemType Directory -Force | Out-Null }
+    # Create Marker File to identify this drive from Guest
+    $MarkerFile = Join-Path $ExternalDataPath ".winbat_marker"
+    if (-not (Test-Path $MarkerFile)) { New-Item -Path $MarkerFile -ItemType File -Force | Out-Null }
+
+    # Setup RetroBat (Mock/Download) on HOST Data folder
+    Write-Host "Setting up RetroBat in Data folder..."
+    $RetroBatDir = Join-Path $ExternalDataPath "RetroBat"
+
+    # Check if RetroBat already exists (Reinstall scenario)
+    if (-not (Test-Path $RetroBatDir)) {
+        New-Item -Path $RetroBatDir -ItemType Directory -Force | Out-Null
+
+        # Create ROM folders structure based on templates
+        $RomsDir = Join-Path $RetroBatDir "roms"
+        $Folders = @("vod", "cloud", "multimedia", "windows", "apps")
+        foreach ($F in $Folders) {
+            $P = Join-Path $RomsDir $F
+            if (-not (Test-Path $P)) { New-Item -Path $P -ItemType Directory -Force | Out-Null }
+        }
+
+        # Copy System Template if exists
+        $SysTemplate = Join-Path $ScriptPath "..\Resources\es_systems_template.xml"
+        if (Test-Path $SysTemplate) {
+             Copy-Item -Path $SysTemplate -Destination (Join-Path $RetroBatDir "es_systems_winbat.xml") -Force
+        }
+
+        # Mock Executable for testing
+        $RBExe = Join-Path $RetroBatDir "retrobat.exe"
+        if (-not (Test-Path $RBExe)) { Set-Content -Path $RBExe -Value "Mock RetroBat" }
+    } else {
+        Write-Host "RetroBat folder detected. Preserving existing data." -ForegroundColor Cyan
     }
-
-    # Copy System Template if exists
-    $SysTemplate = Join-Path $ScriptPath "..\Resources\es_systems_template.xml"
-    # In a real scenario, this would be merged into es_systems.cfg inside .emulationstation
-    # For now, we place it there for manual reference or future automation
-    Copy-Item -Path $SysTemplate -Destination (Join-Path $RetroBatDir "es_systems_winbat.xml") -Force
 
     # Inject RunOnce via Registry
     # Mount Guest SYSTEM Hive

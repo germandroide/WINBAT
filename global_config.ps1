@@ -12,7 +12,7 @@
 # Base path where VHDX files will be created (User selectable)
 $Global:WB_InstallPath          = "C:\WinBat"
 # Maximum dynamic size for the VHDX (in GB)
-$Global:WB_VHDMaxSizeGB         = 100
+$Global:WB_VHDMaxSizeGB         = 25
 
 # ==========================================
 # 2. VHDX Configuration

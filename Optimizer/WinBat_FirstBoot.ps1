@@ -52,12 +52,49 @@ try {
     Checkpoint-Computer -Description "Pre-WinBat-Optimization" -RestorePointType "MODIFY_SETTINGS" -ErrorAction SilentlyContinue
 
     # ==========================================
-    # 2. Host Isolation (Hide Drives)
+    # 2. Mount Host Data & Host Isolation
     # ==========================================
     Write-Host (Get-Tr "OPT_ISOLATING_DRIVES")
 
+    # 2a. Find External Data Folder
+    Write-Host "Scanning for WinBat Data..."
+    $DataDriveLetter = $null
+
+    # Get all drives
+    $Drives = Get-PSDrive -PSProvider FileSystem
+    foreach ($D in $Drives) {
+        # Check for marker file
+        $MarkerPath = Join-Path $D.Root "WinBat\Data\.winbat_marker" # Standard path relative to root?
+        # Or search recursively? Searching root of drives is safer for performance.
+        # Installer puts it in $InstallPath/Data. If InstallPath is C:\WinBat, marker is C:\WinBat\Data\.winbat_marker
+        # But inside Guest, C: is VHDX. The Host C: is mapped to another letter or hidden?
+        # By default, Windows assigns letters to all partitions.
+
+        # We need to find the specific marker.
+        # Check standard path
+        $PossiblePath = Join-Path $D.Root "WinBat\Data\.winbat_marker"
+        if (Test-Path $PossiblePath) {
+            $DataDriveLetter = $D.Name # e.g. "E"
+            $DataPath = Join-Path $D.Root "WinBat\Data"
+            Write-Host "Found Data on Drive $($DataDriveLetter):" -ForegroundColor Cyan
+
+            # Mount to B: (Base)
+            if (-not (Test-Path "B:")) {
+                Write-Host "Mounting Data to B:..."
+                subst B: "$DataPath"
+            }
+
+            # Create Symlink C:\RetroBat -> B:\RetroBat
+            if (-not (Test-Path "C:\RetroBat")) {
+                cmd /c mklink /D "C:\RetroBat" "B:\RetroBat" | Out-Null
+            }
+            break
+        }
+    }
+
+    # 2b. Hide Other Drives
     # Logic: Get all partitions. If they are NOT the Boot partition or the Current System partition (C:), remove drive letter.
-    # Note: In VHD Native Boot, C: is the VHD. Physical drives are visible.
+    # EXCEPTION: Do not remove the drive letter of the Data Drive ($DataDriveLetter), otherwise subst B: fails.
 
     $SystemPart = Get-Partition | Where-Object { $_.DriveLetter -eq "C" }
     $BootPart = Get-Partition | Where-Object { $_.IsBoot -eq $true }
@@ -70,6 +107,12 @@ try {
 
         # Skip EFI/Boot partition (if visible)
         if ($Part.IsBoot -eq $true) { continue }
+
+        # Skip Data Drive (Host Partition containing WinBat Data)
+        if ($DataDriveLetter -ne $null -and $Part.DriveLetter -eq $DataDriveLetter) {
+             Write-Host "Keeping Data Drive $($Part.DriveLetter): Visible (Mounted as B:)" -ForegroundColor Gray
+             continue
+        }
 
         # Remove Drive Letter
         Write-Host ($Global:WB_LangDict["OPT_HIDING_DRIVE"] -f $Part.DriveLetter) -ForegroundColor Gray
