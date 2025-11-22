@@ -82,6 +82,52 @@ try {
         $SuggestedPath = "${BestDrive}:\WinBat"
     }
 
+    # ==========================================
+    # 1.5. Language Selection (Manual Override)
+    # ==========================================
+    Write-Host "Language Selection / Selección de Idioma:"
+    $LangFiles = Get-ChildItem -Path (Join-Path $Global:WB_ResourcePath "Languages") -Filter "*.json"
+    $i = 1
+    foreach ($F in $LangFiles) {
+        Write-Host "$i. $($F.BaseName)"
+        $i++
+    }
+    Write-Host "0. Auto-Detect (Default)"
+
+    $LangChoice = Read-Host "Select Language [0-$($LangFiles.Count)]"
+
+    if ($LangChoice -match "^\d+$" -and $LangChoice -gt 0 -and $LangChoice -le $LangFiles.Count) {
+        $SelectedLang = $LangFiles[$LangChoice-1].BaseName
+        Write-Host "Selected: $SelectedLang" -ForegroundColor Cyan
+
+        # Save preference to config.json (create if missing)
+        $ConfigJsonPath = $Global:WB_ConfigPath # defined in global_config as C:\WinBat\Config\config.json
+        # Note: Install-WinBat runs on Host. C:\WinBat might not exist yet or be the target.
+        # We should save it to the global_config.ps1 variable? No, global_config is shared.
+        # We can modify global_config.ps1 directly to set default, or better, use a sidecar config.
+        # Let's update global_config.ps1 default language logic to check a file.
+
+        # Actually, we can just set the environment variable for this session and persist it to the installation later.
+        # For now, let's update global_config.ps1 `Load-WinBatLanguage` to prefer a hardcoded variable if set.
+        # And here we update global_config.ps1 `Global:WB_CurrentLanguage` default?
+        # No, `Load-WinBatLanguage` overwrites it.
+
+        # Strategy: Update `global_config.ps1` to have a persistent `$Global:WB_ForceLanguage`.
+        $ConfigContent = Get-Content $GlobalConfigPath
+        # Check if variable exists, if not add it
+        if ($ConfigContent -notmatch "WB_ForceLanguage") {
+             # Add it before Load-WinBatLanguage call
+             $NewContent = $ConfigContent -replace '# Initialize Language on Load', "`$Global:WB_ForceLanguage = `"$SelectedLang`"`r`n# Initialize Language on Load"
+             Set-Content -Path $GlobalConfigPath -Value $NewContent
+        } else {
+             $NewContent = $ConfigContent -replace '\$Global:WB_ForceLanguage\s*=.*', "`$Global:WB_ForceLanguage = `"$SelectedLang`""
+             Set-Content -Path $GlobalConfigPath -Value $NewContent
+        }
+
+        # Reload to apply translation immediately
+        . $GlobalConfigPath
+    }
+
     Write-Host (Get-Tr "INSTALL_SELECT_PATH")
     Write-Host "Suggested: $SuggestedPath" -ForegroundColor Cyan
     $InputPath = Read-Host "Hit Enter to accept or type new path"
@@ -247,18 +293,22 @@ try {
     if (-not (Test-Path $AMDir)) { New-Item -Path $AMDir -ItemType Directory -Force | Out-Null }
 
     try {
-        # Download Portable Version (Mocking the URL since we are offline/restricted,
-        # but ideally this pulls from GitHub releases)
-        # In a real scenario:
-        # Invoke-WebRequest -Uri "https://github.com/AntiMicroX/antimicrox/releases/download/3.3.3/antimicrox-3.3.3-Windows-AMD64.zip" -OutFile "$AMDir\antimicrox.zip"
-        # Expand-Archive "$AMDir\antimicrox.zip" -DestinationPath $AMDir -Force
-        # Remove-Item "$AMDir\antimicrox.zip"
+        # Attempt download from GitHub release (v3.4.1 Portable)
+        $AmUrl = "https://github.com/AntiMicroX/antimicrox/releases/download/3.4.1/antimicrox-3.4.1-Windows-AMD64.zip"
+        $AmZip = Join-Path $AMDir "antimicrox.zip"
 
-        # For this environment, we create a mock executable to satisfy the requirement
-        $AMExe = Join-Path $AMDir "antimicrox.exe"
-        Set-Content -Path $AMExe -Value "Mock AntiMicroX Executable"
+        # We try to download, but fallback to mock if no internet or error
+        try {
+            Invoke-WebRequest -Uri $AmUrl -OutFile $AmZip -ErrorAction Stop
+            Expand-Archive $AmZip -DestinationPath $AMDir -Force
+            Remove-Item $AmZip -Force
+        } catch {
+            Write-Warning "Failed to download AntiMicroX from GitHub. Creating placeholder."
+            $AMExe = Join-Path $AMDir "antimicrox.exe"
+            Set-Content -Path $AMExe -Value "Mock AntiMicroX Executable (Download Failed)"
+        }
     } catch {
-        Write-Warning "Failed to download AntiMicroX. Please install manually."
+        Write-Warning "AntiMicroX setup error."
     }
 
     # 7d. Setup External Data Folder (Host Persistence)

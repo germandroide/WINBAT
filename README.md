@@ -112,3 +112,7 @@ Este proyecto está licenciado bajo la **Licencia Creative Commons Atribución-N
 Para ver una copia de esta licencia, visite [http://creativecommons.org/licenses/by-nc-sa/4.0/](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 > **Nota sobre Software:** Aunque esta licencia se aplica comúnmente a obras creativas, en el contexto de este proyecto, se aplica al código fuente, scripts y documentación para prohibir explícitamente la explotación comercial sin consentimiento previo del autor.
+
+## Atribuciones y Terceros
+
+Este proyecto utiliza, descarga o interactúa con software de terceros. Consulte el archivo [NOTICE.md](NOTICE.md) para ver la lista completa de créditos, licencias y avisos legales correspondientes a Microsoft, RetroBat, AntiMicroX y otros componentes.
