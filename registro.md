@@ -68,6 +68,11 @@ Archivo central de variables cargado por todos los scripts.
 *   **L10n**: Sistema de localización que carga archivos JSON (`Resources/Languages/*.json`) basado en la cultura del sistema (`Get-UICulture`), con fallback a UTF-8 forzado.
 
 ## 4. Recursos
-*   **Idiomas**: Soporte para 11 locales (en-US, es-ES, fr-FR, de-DE, it-IT, pt-PT, pt-BR, ru-RU, zh-CN, ja-JP, hi-IN, ko-KR).
+*   **Idiomas**: Soporte para 11 locales (en-US, es-ES, fr-FR, de-DE, it-IT, pt-PT, pt-BR, ru-RU, zh-CN, ja-JP, hi-IN, ko-KR). Se incluye selector manual en el instalador para casos donde la detección automática falle.
 *   **Plantillas**: Guías de creación de paquetes y scripts de ejemplo (Amiga).
 *   **Perfiles**: Perfil de AntiMicroX para navegación con mando.
+
+## 5. Verificación de Calidad y Licencias
+*   **URLs y Dependencias**: Se ha verificado que los scripts apuntan a fuentes oficiales o repositorios mantenidos (GitHub Releases para AntiMicroX, Winget/Microsoft para Runtimes).
+*   **Licencia**: El proyecto está protegido bajo licencia **CC BY-NC-SA 4.0** para evitar lucro comercial no autorizado.
+*   **Avisos Legales**: Se incluye un archivo `NOTICE.md` con las atribuciones a terceros (RetroBat, Microsoft, etc.).

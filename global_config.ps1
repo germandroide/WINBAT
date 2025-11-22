@@ -156,9 +156,13 @@ function Load-WinBatLanguage {
         If the specific language (e.g., es-ES) is not found, it falls back to en-US.
     #>
 
-    # Detect system language
-    $SystemCulture = Get-UICulture
-    $LangCode = $SystemCulture.Name # e.g., "en-US", "es-ES"
+    # Detect system language (Priority: Manual Override -> System Culture)
+    if ($Global:WB_ForceLanguage) {
+        $LangCode = $Global:WB_ForceLanguage
+    } else {
+        $SystemCulture = Get-UICulture
+        $LangCode = $SystemCulture.Name # e.g., "en-US", "es-ES"
+    }
 
     $LangFile = Join-Path -Path $Global:WB_ResourcePath -ChildPath "Languages\$LangCode.json"
 
