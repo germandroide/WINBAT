@@ -30,7 +30,7 @@ WinBat no es un simple programa, es un **Sistema Operativo Híbrido**. Utiliza u
 
 ### Requisitos
 *   Windows 10 o Windows 11 (64 bits).
-*   Al menos 60 GB de espacio libre (recomendado en disco SSD).
+*   Al menos 20 GB de espacio libre (recomendado en disco SSD).
 *   Privilegios de Administrador.
 
 ### Paso a Paso
