@@ -60,10 +60,25 @@ try {
     # ==========================================
     # 2. Select Installation Path
     # ==========================================
+    # Auto-detect best drive (Non-System)
+    $SuggestedPath = $Global:WB_InstallPath
+    $SystemDrive = (Get-Item env:SystemDrive).Value.Substring(0,1)
+
+    $OtherDrives = Get-PSDrive -PSProvider FileSystem | Where-Object {
+        $_.Name -match "^[A-Z]$" -and $_.Name -ne $SystemDrive -and $_.Free -gt 30GB
+    }
+
+    if ($OtherDrives) {
+        $BestDrive = $OtherDrives[0].Name
+        $SuggestedPath = "${BestDrive}:\WinBat"
+    }
+
     Write-Host (Get-Tr "INSTALL_SELECT_PATH")
-    $InputPath = Read-Host
+    Write-Host "Suggested: $SuggestedPath" -ForegroundColor Cyan
+    $InputPath = Read-Host "Hit Enter to accept or type new path"
+
     if ([string]::IsNullOrWhiteSpace($InputPath)) {
-        $InstallPath = $Global:WB_InstallPath # Default from config
+        $InstallPath = $SuggestedPath
     } else {
         $InstallPath = $InputPath
     }
@@ -264,6 +279,39 @@ try {
     } else {
         Write-Host "RetroBat folder detected. Preserving existing data." -ForegroundColor Cyan
     }
+
+    # Install Admin Console Launcher to RetroBat Apps
+    $RBAppsDir = Join-Path $RetroBatDir "roms\ports" # "ports" as requested
+    if (-not (Test-Path $RBAppsDir)) { New-Item -Path $RBAppsDir -ItemType Directory -Force | Out-Null }
+
+    # We need to point to the Manage-WinBat.ps1 on the HOST filesystem.
+    # But from RetroBat (inside Guest), Host is B: (Data) or we need to find where Manage-WinBat is.
+    # Manage-WinBat is in the Install Folder on Host.
+    # We should copy Manage-WinBat.ps1 to Data folder so it's accessible as B:\Manage-WinBat.ps1?
+    # Or rely on the fact that we mount the Data folder to B:.
+    # If InstallPath is C:\WinBat, Data is C:\WinBat\Data. Manage is C:\WinBat\Manage-WinBat.ps1.
+    # They are siblings.
+    # Let's copy Manage-WinBat.ps1 into Data folder for easier access from Guest?
+    # Or better: "C:\WinBat_Data\RetroBat\roms\ports\Configuración Avanzada WinBat.bat"
+    # This .bat runs inside Guest. It needs to launch the script.
+
+    # Problem: Manage-WinBat features (Group 2) need to access Host.
+    # Guest cannot easily access Host files outside of mounted drives.
+    # Strategy: Copy Manage-WinBat.ps1 into Data/System/Tools so it's available in B:.
+
+    $GuestToolsDir = Join-Path $ExternalDataPath "System\Tools"
+    if (-not (Test-Path $GuestToolsDir)) { New-Item -Path $GuestToolsDir -ItemType Directory -Force | Out-Null }
+
+    # Copy Manage-WinBat and Config
+    Copy-Item -Path "$ScriptPath\..\Manage-WinBat.ps1" -Destination $GuestToolsDir -Force
+    Copy-Item -Path "$ScriptPath\..\global_config.ps1" -Destination $GuestToolsDir -Force
+    Copy-Item -Path "$ScriptPath\..\Resources" -Destination $GuestToolsDir -Recurse -Force
+
+    # Create Launcher .bat
+    $LauncherBat = Join-Path $RBAppsDir "WinBat Admin Console.bat"
+    # Content: Run PowerShell script from B:\System\Tools\Manage-WinBat.ps1
+    $BatContent = "@echo off`r`nPowerShell.exe -ExecutionPolicy Bypass -File `"B:\System\Tools\Manage-WinBat.ps1`""
+    Set-Content -Path $LauncherBat -Value $BatContent
 
     # Inject RunOnce via Registry
     # Mount Guest SYSTEM Hive

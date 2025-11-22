@@ -52,43 +52,49 @@ try {
     Checkpoint-Computer -Description "Pre-WinBat-Optimization" -RestorePointType "MODIFY_SETTINGS" -ErrorAction SilentlyContinue
 
     # ==========================================
+    # 1.5. Validate Windows Activation (Hardware ID)
+    # ==========================================
+    Write-Host "Re-validating Windows License (Hardware ID)..."
+    # Force activation against MS servers using the inherited digital license
+    Start-Process "slmgr.exe" -ArgumentList "/ato" -WindowStyle Hidden -Wait
+
+    # ==========================================
     # 2. Mount Host Data & Host Isolation
     # ==========================================
     Write-Host (Get-Tr "OPT_ISOLATING_DRIVES")
 
     # 2a. Find External Data Folder
-    Write-Host "Scanning for WinBat Data..."
+    Write-Host "Scanning for WinBat Data (Deep Scan)..."
     $DataDriveLetter = $null
 
     # Get all drives
     $Drives = Get-PSDrive -PSProvider FileSystem
     foreach ($D in $Drives) {
-        # Check for marker file
-        $MarkerPath = Join-Path $D.Root "WinBat\Data\.winbat_marker" # Standard path relative to root?
-        # Or search recursively? Searching root of drives is safer for performance.
-        # Installer puts it in $InstallPath/Data. If InstallPath is C:\WinBat, marker is C:\WinBat\Data\.winbat_marker
-        # But inside Guest, C: is VHDX. The Host C: is mapped to another letter or hidden?
-        # By default, Windows assigns letters to all partitions.
+        if ($D.Name -eq "C") { continue } # Skip Guest C:
 
-        # We need to find the specific marker.
-        # Check standard path
-        $PossiblePath = Join-Path $D.Root "WinBat\Data\.winbat_marker"
-        if (Test-Path $PossiblePath) {
-            $DataDriveLetter = $D.Name # e.g. "E"
-            $DataPath = Join-Path $D.Root "WinBat\Data"
-            Write-Host "Found Data on Drive $($DataDriveLetter):" -ForegroundColor Cyan
+        # Deep scan for marker file (Depth 2 to catch X:\Games\WinBat\Data)
+        try {
+             $Marker = Get-ChildItem -Path $D.Root -Recurse -Depth 3 -Filter ".winbat_marker" -ErrorAction SilentlyContinue | Select-Object -First 1
+             if ($Marker) {
+                $DataDriveLetter = $D.Name
+                $DataPath = $Marker.DirectoryName
 
-            # Mount to B: (Base)
-            if (-not (Test-Path "B:")) {
-                Write-Host "Mounting Data to B:..."
-                subst B: "$DataPath"
-            }
+                Write-Host "Found Data on Drive $($DataDriveLetter): at $DataPath" -ForegroundColor Cyan
 
-            # Create Symlink C:\RetroBat -> B:\RetroBat
-            if (-not (Test-Path "C:\RetroBat")) {
-                cmd /c mklink /D "C:\RetroBat" "B:\RetroBat" | Out-Null
-            }
-            break
+                # Mount to B: (Base)
+                if (-not (Test-Path "B:")) {
+                    Write-Host "Mounting Data to B:..."
+                    subst B: "$DataPath"
+                }
+
+                # Create Symlink C:\RetroBat -> B:\RetroBat
+                if (-not (Test-Path "C:\RetroBat")) {
+                    cmd /c mklink /D "C:\RetroBat" "B:\RetroBat" | Out-Null
+                }
+                break
+             }
+        } catch {
+             Write-Warning "Failed to scan drive $($D.Name)"
         }
     }
 
