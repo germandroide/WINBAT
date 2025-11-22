@@ -104,5 +104,8 @@
   "PKG_BTN_BUILD": "Build Package to File",
   "PKG_SUCCESS_IMPORT": "Package installed successfully. Restart RetroBat.",
   "PKG_DEV_INTRO": "Let's create a template for your package. Check the included guide in the generated folder.",
-  "PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing."
+  "PKG_MANIFEST_ERR": "The manifest.json file is invalid or missing.",
+  "STATUS_EXPORTING_DRIVERS": "Exporting host drivers...",
+  "STATUS_PURGING_COMPONENTS": "Removing unnecessary Windows components...",
+  "STATUS_COMPACTING": "Applying LZX compression..."
 }

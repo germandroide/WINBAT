@@ -294,16 +294,18 @@ try {
 
     try {
         # Attempt download from GitHub release (v3.4.1 Portable)
+        # Using a standard request to allow for TLS negotiation if needed
         $AmUrl = "https://github.com/AntiMicroX/antimicrox/releases/download/3.4.1/antimicrox-3.4.1-Windows-AMD64.zip"
         $AmZip = Join-Path $AMDir "antimicrox.zip"
 
         # We try to download, but fallback to mock if no internet or error
         try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Invoke-WebRequest -Uri $AmUrl -OutFile $AmZip -ErrorAction Stop
             Expand-Archive $AmZip -DestinationPath $AMDir -Force
             Remove-Item $AmZip -Force
         } catch {
-            Write-Warning "Failed to download AntiMicroX from GitHub. Creating placeholder."
+            Write-Warning "Failed to download AntiMicroX from GitHub ($AmUrl). Creating placeholder."
             $AMExe = Join-Path $AMDir "antimicrox.exe"
             Set-Content -Path $AMExe -Value "Mock AntiMicroX Executable (Download Failed)"
         }

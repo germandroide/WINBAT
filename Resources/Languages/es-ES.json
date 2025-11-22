@@ -104,5 +104,8 @@
   "MSG_SNAPSHOT_CREATED": "Snapshot created successfully at: {0}",
   "MSG_RESTORE_DONE": "Snapshot restored successfully.",
   "MSG_UNINSTALL_CONFIRM": "Are you sure you want to uninstall WinBat? This will delete the VHDX files.",
-  "MSG_UNINSTALL_DATA": "Do you also want to delete the 'Data' folder (ROMS/Configs)? (Y/N)"
+  "MSG_UNINSTALL_DATA": "Do you also want to delete the 'Data' folder (ROMS/Configs)? (Y/N)",
+  "STATUS_EXPORTING_DRIVERS": "Exporting host drivers...",
+  "STATUS_PURGING_COMPONENTS": "Removing unnecessary Windows components...",
+  "STATUS_COMPACTING": "Applying LZX compression..."
 }
