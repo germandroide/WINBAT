@@ -72,12 +72,9 @@ function Refresh-List {
 }
 
 # ==========================================
-# 2. Authenticate (Simple PIN)
+# 2. Authenticate (Secure PIN)
 # ==========================================
-# Default PIN is 0000 if not set in global
-$UserPin = ""
-$CorrectPin = $Global:WB_SecurityPIN
-if (-not $CorrectPin) { $CorrectPin = "0000" }
+# Uses Test-WinBatPin from global_config.ps1
 
 # Prompt Logic
 $AuthForm = New-Object System.Windows.Forms.Form
@@ -107,8 +104,8 @@ $AuthForm.AcceptButton = $BtnAuth
 $Result = $AuthForm.ShowDialog()
 
 if ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
-    # Simple Check - Ideally compare against a stored hash or specific global
-    if ($TxtPin.Text -eq $CorrectPin) {
+    # Secure Hash Check
+    if (Test-WinBatPin -InputPin $TxtPin.Text) {
         # Success
     } else {
         [System.Windows.Forms.MessageBox]::Show((Get-Tr "SM_PIN_INVALID"), (Get-Tr "SM_TITLE"), [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)

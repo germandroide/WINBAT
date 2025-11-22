@@ -181,7 +181,34 @@ try {
         Set-Content -Path $RetroBatExe -Value "Placeholder"
     }
 
-    # 7c. Create Shell Launcher Wrapper
+    # 7c. Install Dependencies (Critical Fix - Chicken & Egg)
+    # RetroBat needs VC++ runtimes before it can even start.
+    # We run this BEFORE changing the shell to ensure success.
+    Write-Host "Installing Critical Runtimes..."
+    $DepScript = "C:\WinBat\Optimizer\WinBat_Dependencies.ps1"
+    if (Test-Path $DepScript) {
+        $Proc = Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File $DepScript" -Wait -PassThru
+        if ($Proc.ExitCode -ne 0) {
+            Write-Warning "Dependency installation might have failed or was cancelled."
+        }
+    } else {
+        Write-Warning "Dependency script not found at $DepScript"
+    }
+
+    # 7d. Configure AntiMicroX Startup (Controller Support)
+    Write-Host "Configuring AntiMicroX..."
+    $AMExe = "C:\WinBat\System\AntiMicroX\antimicrox.exe"
+    $AMProfile = "C:\WinBat\Resources\mouse_profile.gamecontroller.amgp"
+
+    if (Test-Path $AMExe) {
+        $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+        if (-not (Test-Path $RunKey)) { New-Item -Path $RunKey -Force | Out-Null }
+
+        $AMCmd = "`"$AMExe`" --hidden --profile `"$AMProfile`""
+        Set-ItemProperty -Path $RunKey -Name "AntiMicroX" -Value $AMCmd -Type String
+    }
+
+    # 7e. Create Shell Launcher Wrapper
     # Standard Run/RunOnce keys don't fire if Explorer isn't the shell.
     # We create a wrapper to launch services and OOBE before RetroBat.
     $LauncherPath = "C:\WinBat\ShellLauncher.ps1"
@@ -192,16 +219,11 @@ try {
 # 1. Start Mount Service
 Start-Process PowerShell.exe -ArgumentList "-WindowStyle Hidden -ExecutionPolicy Bypass -File C:\WinBat\StorageManager\WinBat_MountService.ps1" -WindowStyle Hidden
 
-# 2. Check for OOBE / Dependencies
+# 2. Check for OOBE
 `$OobeFlag = "C:\WinBat\Config\OOBE_Done.flag"
 if (-not (Test-Path `$OobeFlag)) {
-    # First Run Dependencies
-    Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Optimizer\WinBat_Dependencies.ps1" -Wait
-
+    # Dependencies are now installed in FirstBoot, but we keep this check or just App Manager
     # Run OOBE App Manager (Welcome Mode is just the App Manager opened first time)
-    # We can just open the App Manager. The OOBE folder/script might be redundant if we unify,
-    # but the prompt asked for App Manager to have OOBE mode.
-    # For now, we launch App Manager.
     Start-Process PowerShell.exe -ArgumentList "-ExecutionPolicy Bypass -File C:\WinBat\Apps\WinBat_AppManager.ps1" -Wait
 
     New-Item -Path `$OobeFlag -ItemType File -Force | Out-Null
@@ -216,7 +238,7 @@ while (`$true) {
 "@
     Set-Content -Path $LauncherPath -Value $LauncherContent
 
-    # 7d. Change Shell (Registry) to Wrapper
+    # 7f. Change Shell (Registry) to Wrapper
     Write-Host (Get-Tr "OPT_SHELL_CHANGE")
 
     $ShellKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
